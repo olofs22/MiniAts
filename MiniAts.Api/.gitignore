@@ -10,3 +10,6 @@ obj/
 ## Rider / VS Code
 .idea/
 .vscode/
+
+## Claude Code session state
+.claude/
