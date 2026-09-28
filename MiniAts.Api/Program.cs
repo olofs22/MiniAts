@@ -1,5 +1,9 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
+using MiniAts.Api.Auth;
 using MiniAts.Api.Data;
+using MiniAts.Api.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +17,22 @@ builder.Services.AddDbContext<MiniAtsDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Supabase"))
            .UseSnakeCaseNamingConvention());
 
+builder.Services.AddScoped<IClaimsTransformation, ProfileClaimsTransformation>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = builder.Configuration["Supabase:Authority"];
+        options.Audience = builder.Configuration["Supabase:Audience"];
+        options.MapInboundClaims = false;
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireClaim(AppClaimTypes.AtsRole, nameof(ProfileRole.Admin)));
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -23,6 +43,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
