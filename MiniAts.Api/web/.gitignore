@@ -6,6 +6,9 @@
 /out-tsc
 /bazel-out
 
+# Local secrets (Supabase keys) - see src/environments/environment.development.ts.example
+/src/environments/environment.development.ts
+
 # Node
 /node_modules
 npm-debug.log

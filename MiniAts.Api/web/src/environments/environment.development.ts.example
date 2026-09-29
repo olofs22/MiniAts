@@ -1,0 +1,6 @@
+export const environment = {
+  production: false,
+  apiUrl: 'https://localhost:7000',
+  supabaseUrl: 'https://REPLACE-WITH-PROJECT-REF.supabase.co',
+  supabaseAnonKey: 'REPLACE-WITH-ANON-KEY',
+};
