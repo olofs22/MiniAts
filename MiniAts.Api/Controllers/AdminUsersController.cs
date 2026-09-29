@@ -63,6 +63,11 @@ public class AdminUsersController(
             // interrupted flow instead of failing again.
             return await CreateProfile(existing, request.OrgId, role);
         }
+        catch (SupabaseAdminApiException ex)
+        {
+            logger.LogWarning(ex, "Supabase Admin Auth API rejected the invite for {Email}.", request.Email);
+            return UnprocessableEntity($"Supabase rejected the invite for '{request.Email}': {ex.Message}");
+        }
 
         return await CreateProfile(supabaseUser, request.OrgId, role);
     }
