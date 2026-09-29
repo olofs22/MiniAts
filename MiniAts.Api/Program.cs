@@ -27,6 +27,7 @@ builder.Services.AddDbContext<MiniAtsDbContext>(options =>
            .UseSnakeCaseNamingConvention());
 
 builder.Services.AddScoped<IClaimsTransformation, ProfileClaimsTransformation>();
+builder.Services.AddScoped<IOrgAccessService, OrgAccessService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
