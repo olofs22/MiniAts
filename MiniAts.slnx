@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="MiniAts.Api.Tests/MiniAts.Api.Tests.csproj" />
   <Project Path="MiniAts.Api/MiniAts.Api.csproj" />
 </Solution>
