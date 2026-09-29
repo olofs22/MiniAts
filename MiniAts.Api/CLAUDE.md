@@ -20,6 +20,12 @@ applications (candidate_id, job_id, stage, position).
 Stages: New, Screening, Interview, Offer, Hired, Rejected.
 Kanban visar applications. En kandidat kan ligga på flera jobb.
 
+## Onboarding
+Ny org + första användaren för en kund skapas via `POST /api/admin/organizations` och
+`POST /api/admin/users` (kräver Admin-roll). Den allra första admin-användaren
+bootstrappas manuellt, se `Data/Sql/bootstrap-first-admin.sql`. Dessa endpoints
+saknar ännu automatiska tester (inget testprojekt finns i repot än).
+
 ## Konventioner
 - Controllers returnerar DTO:er, aldrig EF-entiteter.
 - Alla queries filtreras på org_id.

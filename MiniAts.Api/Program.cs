@@ -1,9 +1,11 @@
+using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using MiniAts.Api.Auth;
 using MiniAts.Api.Data;
 using MiniAts.Api.Entities;
+using MiniAts.Api.Supabase;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,19 @@ builder.Services.AddDbContext<MiniAtsDbContext>(options =>
 
 builder.Services.AddScoped<IClaimsTransformation, ProfileClaimsTransformation>();
 builder.Services.AddScoped<IOrgAccessService, OrgAccessService>();
+
+builder.Services.AddHttpClient<ISupabaseAdminAuthClient, SupabaseAdminAuthClient>((sp, client) =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var supabaseUrl = config["Supabase:Url"]
+        ?? throw new InvalidOperationException("Supabase:Url is not configured.");
+    var serviceRoleKey = config["Supabase:ServiceRoleKey"]
+        ?? throw new InvalidOperationException("Supabase:ServiceRoleKey is not configured.");
+
+    client.BaseAddress = new Uri($"{supabaseUrl.TrimEnd('/')}/auth/v1/");
+    client.DefaultRequestHeaders.Add("apikey", serviceRoleKey);
+    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", serviceRoleKey);
+});
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
