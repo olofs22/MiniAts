@@ -48,4 +48,45 @@ public class AdminUsersControllerTests
         Assert.Equal(org.Id, stored!.OrgId);
         Assert.Equal(ProfileRole.Admin, stored.Role);
     }
+
+    [Theory]
+    [InlineData("SuperAdmin")]
+    [InlineData("")]
+    public async Task Create_WithInvalidRole_ReturnsBadRequest(string role)
+    {
+        using var db = TestDb.CreateContext();
+        var controller = CreateController(db, new FakeSupabaseAdminAuthClient());
+
+        var result = await controller.Create(new CreateUserRequest("user@example.com", Guid.NewGuid(), role));
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
+        Assert.Equal($"Invalid role '{role}'.", badRequest.Value);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task Create_WithoutEmail_ReturnsBadRequest(string email)
+    {
+        using var db = TestDb.CreateContext();
+        var controller = CreateController(db, new FakeSupabaseAdminAuthClient());
+
+        var result = await controller.Create(new CreateUserRequest(email, Guid.NewGuid(), "Admin"));
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
+        Assert.Equal("Email is required.", badRequest.Value);
+    }
+
+    [Fact]
+    public async Task Create_WithUnknownOrg_ReturnsNotFound()
+    {
+        using var db = TestDb.CreateContext();
+        var controller = CreateController(db, new FakeSupabaseAdminAuthClient());
+        var unknownOrgId = Guid.NewGuid();
+
+        var result = await controller.Create(new CreateUserRequest("user@example.com", unknownOrgId, "Admin"));
+
+        var notFound = Assert.IsType<NotFoundObjectResult>(result.Result);
+        Assert.Equal($"Organization '{unknownOrgId}' not found.", notFound.Value);
+    }
 }
