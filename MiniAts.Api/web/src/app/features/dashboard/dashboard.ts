@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../core/auth/auth.service';
 import { MeService } from '../../core/me.service';
@@ -7,7 +7,7 @@ import { MeService } from '../../core/me.service';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [MatButtonModule],
+  imports: [RouterLink, MatButtonModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
@@ -20,7 +20,7 @@ export class Dashboard {
   readonly loadError = signal<string | null>(null);
 
   constructor() {
-    this.meService.load().catch(() => this.loadError.set('Kunde inte hämta profil.'));
+    this.meService.load().catch(() => this.loadError.set('Could not load profile.'));
   }
 
   async signOut(): Promise<void> {

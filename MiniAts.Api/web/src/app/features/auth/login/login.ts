@@ -48,7 +48,7 @@ export class Login {
       await this.auth.signIn(email, password);
       await this.router.navigateByUrl('/');
     } catch {
-      this.error.set('Fel e-post eller lösenord.');
+      this.error.set('Incorrect email or password.');
     } finally {
       this.loading.set(false);
     }

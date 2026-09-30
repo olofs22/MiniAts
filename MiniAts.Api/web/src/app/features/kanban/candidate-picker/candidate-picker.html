@@ -1,0 +1,16 @@
+<mat-form-field appearance="outline" class="w-full">
+  <mat-label>Add candidate</mat-label>
+  <input
+    matInput
+    [ngModel]="searchTerm()"
+    (ngModelChange)="searchTerm.set($event)"
+    [matAutocomplete]="auto"
+  />
+  <mat-autocomplete #auto="matAutocomplete">
+    @for (candidate of options(); track candidate.id) {
+      <mat-option [value]="candidate.name" (onSelectionChange)="select(candidate)">
+        {{ candidate.name }}
+      </mat-option>
+    }
+  </mat-autocomplete>
+</mat-form-field>

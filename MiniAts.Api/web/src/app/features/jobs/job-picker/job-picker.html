@@ -1,0 +1,16 @@
+<mat-form-field appearance="outline" class="w-full">
+  <mat-label>Add to job</mat-label>
+  <input
+    matInput
+    [ngModel]="searchTerm()"
+    (ngModelChange)="searchTerm.set($event)"
+    [matAutocomplete]="auto"
+  />
+  <mat-autocomplete #auto="matAutocomplete">
+    @for (job of options(); track job.id) {
+      <mat-option [value]="job.title" (onSelectionChange)="select(job)">
+        {{ job.title }}
+      </mat-option>
+    }
+  </mat-autocomplete>
+</mat-form-field>

@@ -1,0 +1,48 @@
+<div class="mx-auto max-w-lg p-6">
+  <h1 class="text-xl font-semibold">{{ isEdit ? 'Edit job' : 'New job' }}</h1>
+
+  @if (loading()) {
+    <p class="mt-4 text-sm text-gray-600">Loading...</p>
+  } @else {
+    <form class="mt-4 flex flex-col gap-2" [formGroup]="form" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline">
+        <mat-label>Title</mat-label>
+        <input matInput formControlName="title" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" rows="4"></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-select formControlName="status">
+          @for (status of statuses; track status) {
+            <mat-option [value]="status">{{ statusLabels[status] }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      @if (error()) {
+        <p class="text-sm text-red-600">{{ error() }}</p>
+      }
+
+      <div class="mt-2 flex items-center gap-2">
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          [disabled]="form.invalid || saving()"
+        >
+          @if (saving()) {
+            <mat-spinner diameter="20" />
+          } @else {
+            Save
+          }
+        </button>
+        <a mat-button routerLink="/jobs">Cancel</a>
+      </div>
+    </form>
+  }
+</div>

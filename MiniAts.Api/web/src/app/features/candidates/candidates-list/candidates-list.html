@@ -1,0 +1,51 @@
+<div class="mx-auto max-w-3xl p-6">
+  <div class="flex items-center justify-between">
+    <h1 class="text-xl font-semibold">Candidates</h1>
+    <div class="flex items-center gap-2">
+      <a mat-stroked-button routerLink="/">Back</a>
+      <a mat-flat-button color="primary" routerLink="/candidates/new">New candidate</a>
+    </div>
+  </div>
+
+  <mat-form-field appearance="outline" class="mt-4 w-full">
+    <mat-label>Search candidates</mat-label>
+    <input matInput [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" />
+  </mat-form-field>
+
+  @if (error()) {
+    <p class="text-sm text-red-600">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="text-sm text-gray-600">Loading candidates...</p>
+  } @else if (filteredCandidates().length === 0) {
+    <p class="text-sm text-gray-600">No candidates found.</p>
+  } @else {
+    <ul class="flex flex-col gap-3">
+      @for (candidate of filteredCandidates(); track candidate.id) {
+        <li class="flex items-center justify-between rounded border border-gray-200 p-4">
+          <div>
+            <p class="font-medium">{{ candidate.name }}</p>
+            @if (candidate.email) {
+              <p class="text-sm text-gray-600">{{ candidate.email }}</p>
+            }
+          </div>
+          <div class="flex items-center gap-2">
+            <a mat-stroked-button [routerLink]="['/candidates', candidate.id]">View</a>
+            <a mat-stroked-button [routerLink]="['/candidates', candidate.id, 'edit']">Edit</a>
+            @if (confirmingDeleteId() === candidate.id) {
+              <button mat-stroked-button color="warn" (click)="deleteCandidate(candidate.id)">
+                Confirm
+              </button>
+              <button mat-button (click)="cancelDelete()">Cancel</button>
+            } @else {
+              <button mat-stroked-button color="warn" (click)="confirmDelete(candidate.id)">
+                Delete
+              </button>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>

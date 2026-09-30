@@ -1,0 +1,54 @@
+<div class="mx-auto max-w-lg p-6">
+  <h1 class="text-xl font-semibold">{{ isEdit ? 'Edit candidate' : 'New candidate' }}</h1>
+
+  @if (loading()) {
+    <p class="mt-4 text-sm text-gray-600">Loading...</p>
+  } @else {
+    <form class="mt-4 flex flex-col gap-2" [formGroup]="form" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Phone</mat-label>
+        <input matInput formControlName="phone" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>LinkedIn URL</mat-label>
+        <input matInput formControlName="linkedInUrl" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Notes</mat-label>
+        <textarea matInput formControlName="notes" rows="4"></textarea>
+      </mat-form-field>
+
+      @if (error()) {
+        <p class="text-sm text-red-600">{{ error() }}</p>
+      }
+
+      <div class="mt-2 flex items-center gap-2">
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          [disabled]="form.invalid || saving()"
+        >
+          @if (saving()) {
+            <mat-spinner diameter="20" />
+          } @else {
+            Save
+          }
+        </button>
+        <a mat-button routerLink="/candidates">Cancel</a>
+      </div>
+    </form>
+  }
+</div>
