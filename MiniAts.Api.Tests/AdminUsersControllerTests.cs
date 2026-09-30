@@ -89,4 +89,96 @@ public class AdminUsersControllerTests
         var notFound = Assert.IsType<NotFoundObjectResult>(result.Result);
         Assert.Equal($"Organization '{unknownOrgId}' not found.", notFound.Value);
     }
+
+    [Fact]
+    public async Task Create_WhenSupabaseUserExistsWithProfileInSameOrg_ReturnsConflict()
+    {
+        using var db = TestDb.CreateContext();
+        var org = await SeedOrganization(db);
+        var existingUserId = Guid.NewGuid();
+        db.Profiles.Add(new Profile { UserId = existingUserId, OrgId = org.Id, Role = ProfileRole.Customer });
+        await db.SaveChangesAsync();
+
+        var supabase = new FakeSupabaseAdminAuthClient
+        {
+            InviteUserByEmail = _ => throw new SupabaseUserAlreadyExistsException("user@example.com"),
+            FindUserByEmail = email => Task.FromResult<SupabaseUserResult?>(new SupabaseUserResult(existingUserId, email))
+        };
+        var controller = CreateController(db, supabase);
+
+        var result = await controller.Create(new CreateUserRequest("user@example.com", org.Id, "Admin"));
+
+        var conflict = Assert.IsType<ConflictObjectResult>(result.Result);
+        Assert.Equal("'user@example.com' is already onboarded to this organization.", conflict.Value);
+    }
+
+    [Fact]
+    public async Task Create_WhenSupabaseUserExistsWithProfileInDifferentOrg_ReturnsConflict()
+    {
+        using var db = TestDb.CreateContext();
+        var org = await SeedOrganization(db, "Org A");
+        var otherOrg = await SeedOrganization(db, "Org B");
+        var existingUserId = Guid.NewGuid();
+        db.Profiles.Add(new Profile { UserId = existingUserId, OrgId = otherOrg.Id, Role = ProfileRole.Customer });
+        await db.SaveChangesAsync();
+
+        var supabase = new FakeSupabaseAdminAuthClient
+        {
+            InviteUserByEmail = _ => throw new SupabaseUserAlreadyExistsException("user@example.com"),
+            FindUserByEmail = email => Task.FromResult<SupabaseUserResult?>(new SupabaseUserResult(existingUserId, email))
+        };
+        var controller = CreateController(db, supabase);
+
+        var result = await controller.Create(new CreateUserRequest("user@example.com", org.Id, "Admin"));
+
+        var conflict = Assert.IsType<ConflictObjectResult>(result.Result);
+        Assert.Equal("'user@example.com' is already onboarded to a different organization.", conflict.Value);
+    }
+
+    [Fact]
+    public async Task Create_WhenSupabaseUserExistsWithoutProfile_ResumesAndCreatesProfile()
+    {
+        using var db = TestDb.CreateContext();
+        var org = await SeedOrganization(db);
+        var existingUserId = Guid.NewGuid();
+
+        var supabase = new FakeSupabaseAdminAuthClient
+        {
+            InviteUserByEmail = _ => throw new SupabaseUserAlreadyExistsException("user@example.com"),
+            FindUserByEmail = email => Task.FromResult<SupabaseUserResult?>(new SupabaseUserResult(existingUserId, email))
+        };
+        var controller = CreateController(db, supabase);
+
+        var result = await controller.Create(new CreateUserRequest("user@example.com", org.Id, "Admin"));
+
+        var created = Assert.IsType<ObjectResult>(result.Result);
+        Assert.Equal(StatusCodes.Status201Created, created.StatusCode);
+        var response = Assert.IsType<UserResponse>(created.Value);
+        Assert.Equal(existingUserId, response.UserId);
+
+        var stored = await db.Profiles.FindAsync(existingUserId);
+        Assert.NotNull(stored);
+        Assert.Equal(org.Id, stored!.OrgId);
+    }
+
+    [Fact]
+    public async Task Create_WhenSupabaseUserExistsButLookupFails_ReturnsConflict()
+    {
+        using var db = TestDb.CreateContext();
+        var org = await SeedOrganization(db);
+
+        var supabase = new FakeSupabaseAdminAuthClient
+        {
+            InviteUserByEmail = _ => throw new SupabaseUserAlreadyExistsException("user@example.com"),
+            FindUserByEmail = _ => Task.FromResult<SupabaseUserResult?>(null)
+        };
+        var controller = CreateController(db, supabase);
+
+        var result = await controller.Create(new CreateUserRequest("user@example.com", org.Id, "Admin"));
+
+        var conflict = Assert.IsType<ConflictObjectResult>(result.Result);
+        Assert.Equal(
+            "'user@example.com' is already registered in Supabase Auth, but the matching user could not be looked up.",
+            conflict.Value);
+    }
 }
