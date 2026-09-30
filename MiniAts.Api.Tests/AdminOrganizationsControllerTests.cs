@@ -23,4 +23,19 @@ public class AdminOrganizationsControllerTests
         Assert.NotNull(stored);
         Assert.Equal("Acme Inc", stored!.Name);
     }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData(null)]
+    public async Task Create_WithoutName_ReturnsBadRequest(string? name)
+    {
+        using var db = TestDb.CreateContext();
+        var controller = new AdminOrganizationsController(db);
+
+        var result = await controller.Create(new CreateOrganizationRequest(name!));
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
+        Assert.Equal("Name is required.", badRequest.Value);
+    }
 }
