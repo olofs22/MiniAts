@@ -15,6 +15,7 @@ namespace MiniAts.Api.Controllers;
 public class AdminUsersController(
     MiniAtsDbContext db,
     ISupabaseAdminAuthClient supabaseAdmin,
+    IConfiguration config,
     ILogger<AdminUsersController> logger) : ControllerBase
 {
     [HttpPost]
@@ -36,10 +37,13 @@ public class AdminUsersController(
             return NotFound($"Organization '{request.OrgId}' not found.");
         }
 
+        var frontendUrl = config["App:FrontendUrl"];
+        var redirectTo = frontendUrl is null ? null : $"{frontendUrl.TrimEnd('/')}/accept-invite";
+
         SupabaseUserResult supabaseUser;
         try
         {
-            supabaseUser = await supabaseAdmin.InviteUserByEmailAsync(request.Email);
+            supabaseUser = await supabaseAdmin.InviteUserByEmailAsync(request.Email, redirectTo);
         }
         catch (SupabaseUserAlreadyExistsException)
         {

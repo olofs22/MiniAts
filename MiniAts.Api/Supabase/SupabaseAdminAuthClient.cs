@@ -6,7 +6,7 @@ namespace MiniAts.Api.Supabase;
 
 public interface ISupabaseAdminAuthClient
 {
-    Task<SupabaseUserResult> InviteUserByEmailAsync(string email, CancellationToken ct = default);
+    Task<SupabaseUserResult> InviteUserByEmailAsync(string email, string? redirectTo = null, CancellationToken ct = default);
     Task<SupabaseUserResult?> FindUserByEmailAsync(string email, CancellationToken ct = default);
 }
 
@@ -23,9 +23,16 @@ public class SupabaseUserAlreadyExistsException(string email)
 // (POST /invite, GET /admin/users) - re-check if Supabase changes this contract.
 public class SupabaseAdminAuthClient(HttpClient httpClient) : ISupabaseAdminAuthClient
 {
-    public async Task<SupabaseUserResult> InviteUserByEmailAsync(string email, CancellationToken ct = default)
+    public async Task<SupabaseUserResult> InviteUserByEmailAsync(string email, string? redirectTo = null, CancellationToken ct = default)
     {
-        var response = await httpClient.PostAsJsonAsync("invite", new InviteUserRequest(email), ct);
+        // Without redirect_to, GoTrue falls back to the project's dashboard-configured
+        // Site URL (often left at the default http://localhost:3000), which breaks the
+        // invite link for anyone not running a server on that port.
+        var requestUri = redirectTo is null
+            ? "invite"
+            : $"invite?redirect_to={Uri.EscapeDataString(redirectTo)}";
+
+        var response = await httpClient.PostAsJsonAsync(requestUri, new InviteUserRequest(email), ct);
 
         if (response.StatusCode == HttpStatusCode.UnprocessableEntity)
         {

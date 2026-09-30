@@ -1,6 +1,7 @@
 using System.Net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using MiniAts.Api.Controllers;
 using MiniAts.Api.Data;
@@ -13,7 +14,7 @@ namespace MiniAts.Api.Tests;
 public class AdminUsersControllerTests
 {
     private static AdminUsersController CreateController(MiniAtsDbContext db, FakeSupabaseAdminAuthClient supabase) =>
-        new(db, supabase, NullLogger<AdminUsersController>.Instance);
+        new(db, supabase, new ConfigurationBuilder().Build(), NullLogger<AdminUsersController>.Instance);
 
     private static async Task<Organization> SeedOrganization(MiniAtsDbContext db, string name = "Acme Inc")
     {

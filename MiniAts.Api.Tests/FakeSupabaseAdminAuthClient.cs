@@ -10,7 +10,7 @@ public class FakeSupabaseAdminAuthClient : ISupabaseAdminAuthClient
     public Func<string, Task<SupabaseUserResult?>> FindUserByEmail { get; set; } =
         _ => throw new InvalidOperationException("FindUserByEmail was not configured for this test.");
 
-    public Task<SupabaseUserResult> InviteUserByEmailAsync(string email, CancellationToken ct = default) =>
+    public Task<SupabaseUserResult> InviteUserByEmailAsync(string email, string? redirectTo = null, CancellationToken ct = default) =>
         InviteUserByEmail(email);
 
     public Task<SupabaseUserResult?> FindUserByEmailAsync(string email, CancellationToken ct = default) =>
