@@ -26,12 +26,24 @@ Ny org + första användaren för en kund skapas via `POST /api/admin/organizati
 bootstrappas manuellt, se `Data/Sql/bootstrap-first-admin.sql`. Dessa endpoints
 saknar ännu automatiska tester (inget testprojekt finns i repot än).
 
+## Frontend (implementerat)
+I /web finns inloggning (Supabase) och dashboard, samt CRUD + Kanban för hela MVP-flödet:
+- Jobs (`features/jobs`): lista, skapa, redigera, ta bort, länk till Kanban-board per jobb.
+- Candidates (`features/candidates`): lista med sök, skapa, redigera, ta bort, detaljvy som visar
+  kandidatens ansökningar och kan lägga till kandidaten på ett jobb.
+- Kanban-board (`features/kanban`, route `/jobs/:jobId/board`): en board per jobb, en kolumn per
+  stage, drag-and-drop med Angular CDK. API:t saknar en reorder-endpoint, så klienten räknar ut ett
+  nytt fraktionellt `position`-värde själv vid varje drag och skriver `stage`+`position` tillsammans
+  via PUT, med optimistisk uppdatering och rollback vid fel.
+- Delade typer/modeller ligger i `shared/models/`.
+
 ## Konventioner
 - Controllers returnerar DTO:er, aldrig EF-entiteter.
 - Alla queries filtreras på org_id.
 - Enable RLS på alla tabeller utan policies, så att PostgREST inte kan nås direkt.
 - Hemligheter i user-secrets/.env, aldrig i git.
 - Angular: en feature-mapp per område, API-anrop via en genererad/typad service.
+- UI-text skrivs på engelska.
 - Skriv ett litet test per ny endpoint där det är rimligt.
 - Committa efter varje fungerande steg.
 
