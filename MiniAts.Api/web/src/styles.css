@@ -1,3 +1,17 @@
 @import "tailwindcss";
 
 /* You can add global styles to this file, and also import other style files */
+
+/* Muted, matte red for destructive actions - Material's color="warn" renders
+   too close to the violet primary in this theme. The component-level color
+   variables Material's buttons read from are injected at runtime (not present
+   in this static stylesheet to target reliably), so force it directly on the
+   button and its internal label element instead. */
+.btn-danger,
+.btn-danger .mdc-button__label {
+  color: #b91c1c !important;
+}
+
+.btn-danger {
+  border-color: #fca5a5 !important;
+}

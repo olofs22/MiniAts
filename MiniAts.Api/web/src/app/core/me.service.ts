@@ -20,4 +20,9 @@ export class MeService {
     this.me.set(me);
     return me;
   }
+
+  /** Clears the cached profile, e.g. on sign-out, so the next sign-in fetches fresh data. */
+  clear(): void {
+    this.me.set(null);
+  }
 }

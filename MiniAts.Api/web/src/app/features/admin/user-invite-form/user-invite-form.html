@@ -1,0 +1,67 @@
+<div class="mx-auto max-w-lg p-6">
+  <h1 class="text-xl font-semibold text-slate-900">Invite user</h1>
+
+  @if (loadingOrgs()) {
+    <p class="mt-4 text-sm text-slate-500">Loading...</p>
+  } @else {
+    <form class="mt-4 flex flex-col gap-2" [formGroup]="form" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline">
+        <mat-label>Organization</mat-label>
+        <mat-select formControlName="orgId">
+          @for (org of organizations(); track org.id) {
+            <mat-option [value]="org.id">{{ org.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Role</mat-label>
+        <mat-select formControlName="role">
+          @for (role of roles; track role) {
+            <mat-option [value]="role">{{ role }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      @if (error()) {
+        <p class="text-sm text-red-600">{{ error() }}</p>
+      }
+
+      <div class="mt-2 flex items-center gap-2">
+        @if (partialFailure()) {
+          <button
+            mat-stroked-button
+            class="btn-danger"
+            type="submit"
+            [disabled]="form.invalid || saving()"
+          >
+            @if (saving()) {
+              <mat-spinner diameter="20" />
+            } @else {
+              Retry
+            }
+          </button>
+        } @else {
+          <button
+            mat-stroked-button
+            color="primary"
+            type="submit"
+            [disabled]="form.invalid || saving()"
+          >
+            @if (saving()) {
+              <mat-spinner diameter="20" />
+            } @else {
+              Send invite
+            }
+          </button>
+        }
+        <a mat-button routerLink="/admin">Cancel</a>
+      </div>
+    </form>
+  }
+</div>

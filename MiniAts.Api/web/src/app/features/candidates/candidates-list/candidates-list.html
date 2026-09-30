@@ -1,10 +1,7 @@
 <div class="mx-auto max-w-3xl p-6">
   <div class="flex items-center justify-between">
-    <h1 class="text-xl font-semibold">Candidates</h1>
-    <div class="flex items-center gap-2">
-      <a mat-stroked-button routerLink="/">Back</a>
-      <a mat-flat-button color="primary" routerLink="/candidates/new">New candidate</a>
-    </div>
+    <h1 class="text-xl font-semibold text-slate-900">Candidates</h1>
+    <a mat-stroked-button color="primary" routerLink="/candidates/new">New candidate</a>
   </div>
 
   <mat-form-field appearance="outline" class="mt-4 w-full">
@@ -17,29 +14,31 @@
   }
 
   @if (loading()) {
-    <p class="text-sm text-gray-600">Loading candidates...</p>
+    <p class="text-sm text-slate-500">Loading candidates...</p>
   } @else if (filteredCandidates().length === 0) {
-    <p class="text-sm text-gray-600">No candidates found.</p>
+    <p class="text-sm text-slate-500">No candidates found.</p>
   } @else {
     <ul class="flex flex-col gap-3">
       @for (candidate of filteredCandidates(); track candidate.id) {
-        <li class="flex items-center justify-between rounded border border-gray-200 p-4">
+        <li
+          class="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4"
+        >
           <div>
-            <p class="font-medium">{{ candidate.name }}</p>
+            <p class="font-medium text-slate-900">{{ candidate.name }}</p>
             @if (candidate.email) {
-              <p class="text-sm text-gray-600">{{ candidate.email }}</p>
+              <p class="text-sm text-slate-500">{{ candidate.email }}</p>
             }
           </div>
           <div class="flex items-center gap-2">
             <a mat-stroked-button [routerLink]="['/candidates', candidate.id]">View</a>
             <a mat-stroked-button [routerLink]="['/candidates', candidate.id, 'edit']">Edit</a>
             @if (confirmingDeleteId() === candidate.id) {
-              <button mat-stroked-button color="warn" (click)="deleteCandidate(candidate.id)">
+              <button mat-stroked-button class="btn-danger" (click)="deleteCandidate(candidate.id)">
                 Confirm
               </button>
               <button mat-button (click)="cancelDelete()">Cancel</button>
             } @else {
-              <button mat-stroked-button color="warn" (click)="confirmDelete(candidate.id)">
+              <button mat-stroked-button class="btn-danger" (click)="confirmDelete(candidate.id)">
                 Delete
               </button>
             }

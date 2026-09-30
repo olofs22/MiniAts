@@ -1,8 +1,10 @@
 <div class="mx-auto max-w-lg p-6">
-  <h1 class="text-xl font-semibold">{{ isEdit ? 'Edit candidate' : 'New candidate' }}</h1>
+  <h1 class="text-xl font-semibold text-slate-900">
+    {{ isEdit ? 'Edit candidate' : 'New candidate' }}
+  </h1>
 
   @if (loading()) {
-    <p class="mt-4 text-sm text-gray-600">Loading...</p>
+    <p class="mt-4 text-sm text-slate-500">Loading...</p>
   } @else {
     <form class="mt-4 flex flex-col gap-2" [formGroup]="form" (ngSubmit)="submit()">
       <mat-form-field appearance="outline">
@@ -36,7 +38,7 @@
 
       <div class="mt-2 flex items-center gap-2">
         <button
-          mat-flat-button
+          mat-stroked-button
           color="primary"
           type="submit"
           [disabled]="form.invalid || saving()"

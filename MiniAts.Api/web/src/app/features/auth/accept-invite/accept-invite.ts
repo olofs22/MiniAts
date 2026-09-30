@@ -10,7 +10,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { Footer } from '../../../core/layout/footer/footer';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-accept-invite',
   standalone: true,
   imports: [
     ReactiveFormsModule,
@@ -21,38 +21,55 @@ import { Footer } from '../../../core/layout/footer/footer';
     MatProgressSpinnerModule,
     Footer,
   ],
-  templateUrl: './login.html',
-  styleUrl: './login.css',
+  templateUrl: './accept-invite.html',
+  styleUrl: './accept-invite.css',
 })
-export class Login {
+export class AcceptInvite {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
-  readonly form = this.fb.nonNullable.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', Validators.required],
-  });
-
-  readonly loading = signal(false);
+  readonly isAuthenticated = this.auth.isAuthenticated;
+  readonly linkInvalid = signal(false);
+  readonly saving = signal(false);
   readonly error = signal<string | null>(null);
 
+  readonly form = this.fb.nonNullable.group({
+    password: ['', [Validators.required, Validators.minLength(6)]],
+    confirmPassword: ['', Validators.required],
+  });
+
+  constructor() {
+    // Supabase parses the invite token from the URL fragment asynchronously; give it
+    // a few seconds before concluding the link is broken/expired rather than never resolving.
+    setTimeout(() => {
+      if (!this.isAuthenticated()) {
+        this.linkInvalid.set(true);
+      }
+    }, 5000);
+  }
+
   async submit(): Promise<void> {
-    if (this.form.invalid || this.loading()) {
+    if (this.form.invalid || this.saving()) {
       return;
     }
 
-    this.loading.set(true);
+    const { password, confirmPassword } = this.form.getRawValue();
+    if (password !== confirmPassword) {
+      this.error.set('Passwords do not match.');
+      return;
+    }
+
+    this.saving.set(true);
     this.error.set(null);
 
     try {
-      const { email, password } = this.form.getRawValue();
-      await this.auth.signIn(email, password);
+      await this.auth.setPassword(password);
       await this.router.navigateByUrl('/');
     } catch {
-      this.error.set('Incorrect email or password.');
+      this.error.set('Could not set your password. Try again, or ask an admin to resend the invite.');
     } finally {
-      this.loading.set(false);
+      this.saving.set(false);
     }
   }
 }

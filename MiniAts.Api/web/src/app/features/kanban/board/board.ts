@@ -93,6 +93,10 @@ export class Board {
     return this.candidatesById().get(candidateId)?.name ?? 'Unknown candidate';
   }
 
+  candidate(candidateId: string): Candidate | undefined {
+    return this.candidatesById().get(candidateId);
+  }
+
   async onDrop(event: CdkDragDrop<Application[]>, targetStage: ApplicationStage): Promise<void> {
     const application = event.item.data as Application;
     const targetList = event.container.data ?? [];

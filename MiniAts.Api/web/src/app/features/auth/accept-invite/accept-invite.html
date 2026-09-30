@@ -1,0 +1,63 @@
+<div class="flex min-h-screen flex-col bg-slate-50">
+  <div class="flex flex-1 flex-col items-center justify-center px-4">
+    <p class="mb-6 text-lg font-semibold tracking-tight text-slate-900">Mini-ATS</p>
+
+    <mat-card class="w-full max-w-sm">
+      <mat-card-header>
+        <mat-card-title>Set your password</mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (linkInvalid()) {
+          <p class="text-sm text-red-600">
+            This invite link is invalid or has expired. Ask an admin to send a new one.
+          </p>
+        } @else if (!isAuthenticated()) {
+          <p class="text-sm text-slate-500">Verifying your invite...</p>
+        } @else {
+          <form class="flex flex-col gap-2" [formGroup]="form" (ngSubmit)="submit()">
+            <mat-form-field appearance="outline">
+              <mat-label>Password</mat-label>
+              <input
+                matInput
+                type="password"
+                formControlName="password"
+                autocomplete="new-password"
+              />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Confirm password</mat-label>
+              <input
+                matInput
+                type="password"
+                formControlName="confirmPassword"
+                autocomplete="new-password"
+              />
+            </mat-form-field>
+
+            @if (error()) {
+              <p class="text-sm text-red-600">{{ error() }}</p>
+            }
+
+            <button
+              mat-stroked-button
+              color="primary"
+              type="submit"
+              class="mt-2"
+              [disabled]="form.invalid || saving()"
+            >
+              @if (saving()) {
+                <mat-spinner diameter="20" />
+              } @else {
+                Set password
+              }
+            </button>
+          </form>
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <app-footer />
+</div>

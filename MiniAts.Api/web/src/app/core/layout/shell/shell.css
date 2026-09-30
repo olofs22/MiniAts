@@ -1,0 +1,12 @@
+.nav-link {
+  transition: color 0.15s ease;
+}
+
+.nav-link:hover {
+  color: var(--mat-sys-on-surface);
+}
+
+.nav-link.nav-link-active {
+  color: var(--mat-sys-primary);
+  font-weight: 600;
+}

@@ -35,4 +35,10 @@ export class AuthService {
   async signOut(): Promise<void> {
     await supabase.auth.signOut();
   }
+
+  /** Sets a password on the currently-authenticated session (e.g. after accepting an invite). */
+  async setPassword(password: string): Promise<void> {
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) throw error;
+  }
 }

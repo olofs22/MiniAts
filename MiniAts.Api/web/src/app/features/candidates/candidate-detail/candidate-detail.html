@@ -1,12 +1,12 @@
 <div class="mx-auto max-w-2xl p-6">
-  <div class="flex items-center justify-between">
-    <h1 class="text-xl font-semibold">{{ candidate()?.name ?? 'Candidate' }}</h1>
-    <div class="flex items-center gap-2">
-      <a mat-stroked-button routerLink="/candidates">Back</a>
-      @if (candidate(); as c) {
-        <a mat-stroked-button [routerLink]="['/candidates', c.id, 'edit']">Edit</a>
-      }
-    </div>
+  <a routerLink="/candidates" class="text-sm text-slate-500 hover:text-slate-700">
+    &larr; Candidates
+  </a>
+  <div class="mt-1 flex items-center justify-between">
+    <h1 class="text-xl font-semibold text-slate-900">{{ candidate()?.name ?? 'Candidate' }}</h1>
+    @if (candidate(); as c) {
+      <a mat-stroked-button [routerLink]="['/candidates', c.id, 'edit']">Edit</a>
+    }
   </div>
 
   @if (error()) {
@@ -14,9 +14,9 @@
   }
 
   @if (loading()) {
-    <p class="mt-4 text-sm text-gray-600">Loading...</p>
+    <p class="mt-4 text-sm text-slate-500">Loading...</p>
   } @else if (candidate(); as c) {
-    <div class="mt-4 text-sm text-gray-600">
+    <div class="mt-4 text-sm text-slate-600">
       @if (c.email) {
         <p>{{ c.email }}</p>
       }
@@ -31,16 +31,18 @@
       }
     </div>
 
-    <h2 class="mt-6 text-lg font-medium">Applications</h2>
+    <h2 class="mt-6 text-lg font-medium text-slate-900">Applications</h2>
     @if (rows().length === 0) {
-      <p class="mt-2 text-sm text-gray-600">Not applied to any jobs yet.</p>
+      <p class="mt-2 text-sm text-slate-500">Not applied to any jobs yet.</p>
     } @else {
       <ul class="mt-2 flex flex-col gap-2">
         @for (row of rows(); track row.application.id) {
-          <li class="flex items-center justify-between rounded border border-gray-200 p-3">
+          <li
+            class="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-3"
+          >
             <span>{{ row.job?.title ?? 'Unknown job' }}</span>
             <div class="flex items-center gap-2">
-              <span class="text-sm text-gray-600">{{ row.application.stage }}</span>
+              <span class="text-sm text-slate-500">{{ row.application.stage }}</span>
               <a mat-stroked-button [routerLink]="['/jobs', row.application.jobId, 'board']">
                 View board
               </a>
