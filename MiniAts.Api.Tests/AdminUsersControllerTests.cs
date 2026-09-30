@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -180,5 +181,57 @@ public class AdminUsersControllerTests
         Assert.Equal(
             "'user@example.com' is already registered in Supabase Auth, but the matching user could not be looked up.",
             conflict.Value);
+    }
+
+    [Fact]
+    public async Task Create_WhenSupabaseRejectsInvite_ReturnsUnprocessableEntity()
+    {
+        using var db = TestDb.CreateContext();
+        var org = await SeedOrganization(db);
+
+        var supabase = new FakeSupabaseAdminAuthClient
+        {
+            InviteUserByEmail = _ => throw new SupabaseAdminApiException(HttpStatusCode.InternalServerError, "boom")
+        };
+        var controller = CreateController(db, supabase);
+
+        var result = await controller.Create(new CreateUserRequest("user@example.com", org.Id, "Admin"));
+
+        var unprocessable = Assert.IsType<UnprocessableEntityObjectResult>(result.Result);
+        Assert.Contains("user@example.com", (string)unprocessable.Value!);
+    }
+
+    // Note: AdminUsersController.CreateProfile also has a branch that catches DbUpdateException
+    // specifically wrapping a Postgres unique-violation (a genuine insert race between two
+    // concurrent requests) and returns 409 instead of 500. That branch pattern-matches on
+    // Npgsql's PostgresException, which Sqlite never throws (it raises its own exception type
+    // for the same underlying constraint violation), so it can't be exercised against this
+    // in-memory Sqlite database. Covering it would require a real Postgres connection.
+    [Fact]
+    public async Task Create_WhenProfileInsertFails_ReturnsPartialFailureResponse()
+    {
+        using var db = TestDb.CreateContext();
+        var org = await SeedOrganization(db);
+        var collidingUserId = Guid.NewGuid();
+        db.Profiles.Add(new Profile { UserId = collidingUserId, OrgId = org.Id, Role = ProfileRole.Customer });
+        await db.SaveChangesAsync();
+        // Detach the seeded row so the controller's insert below hits the database's own
+        // unique-constraint check (a real DbUpdateException) instead of EF's client-side
+        // identity-map conflict, which is a different exception the controller doesn't catch.
+        db.ChangeTracker.Clear();
+
+        var supabase = new FakeSupabaseAdminAuthClient
+        {
+            InviteUserByEmail = email => Task.FromResult(new SupabaseUserResult(collidingUserId, email))
+        };
+        var controller = CreateController(db, supabase);
+
+        var result = await controller.Create(new CreateUserRequest("user@example.com", org.Id, "Admin"));
+
+        var serverError = Assert.IsType<ObjectResult>(result.Result);
+        Assert.Equal(StatusCodes.Status500InternalServerError, serverError.StatusCode);
+        var response = Assert.IsType<CreateUserPartialFailureResponse>(serverError.Value);
+        Assert.Equal(collidingUserId, response.SupabaseUserId);
+        Assert.Equal(org.Id, response.OrgId);
     }
 }
