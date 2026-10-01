@@ -34,6 +34,10 @@
 
       <div class="flex items-center gap-4">
         @if (me(); as profile) {
+          @if (profile.orgName) {
+            <span class="text-sm font-medium text-slate-700">{{ profile.orgName }}</span>
+          }
+          <span class="text-sm text-slate-500">{{ profile.email }}</span>
           <span class="text-sm text-slate-500">{{ profile.role }}</span>
         }
         <button mat-stroked-button (click)="signOut()">Log out</button>

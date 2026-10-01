@@ -31,10 +31,18 @@ public class AdminUsersController(
             return BadRequest("Email is required.");
         }
 
-        var orgExists = await db.Organizations.AnyAsync(o => o.Id == request.OrgId);
-        if (!orgExists)
+        if (request.OrgId is null && role == ProfileRole.Customer)
         {
-            return NotFound($"Organization '{request.OrgId}' not found.");
+            return BadRequest("OrgId is required for Customer users.");
+        }
+
+        if (request.OrgId is not null)
+        {
+            var orgExists = await db.Organizations.AnyAsync(o => o.Id == request.OrgId);
+            if (!orgExists)
+            {
+                return NotFound($"Organization '{request.OrgId}' not found.");
+            }
         }
 
         var frontendUrl = config["App:FrontendUrl"];
@@ -76,7 +84,7 @@ public class AdminUsersController(
         return await CreateProfile(supabaseUser, request.OrgId, role);
     }
 
-    private async Task<ActionResult<UserResponse>> CreateProfile(SupabaseUserResult supabaseUser, Guid orgId, ProfileRole role)
+    private async Task<ActionResult<UserResponse>> CreateProfile(SupabaseUserResult supabaseUser, Guid? orgId, ProfileRole role)
     {
         var profile = new Profile { UserId = supabaseUser.UserId, OrgId = orgId, Role = role };
         db.Profiles.Add(profile);

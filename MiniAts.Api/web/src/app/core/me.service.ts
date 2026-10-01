@@ -5,8 +5,10 @@ import { environment } from '../../environments/environment';
 
 export interface Me {
   userId: string;
+  email: string;
   role: 'Admin' | 'Customer';
-  orgId: string;
+  orgId: string | null;
+  orgName: string | null;
 }
 
 @Injectable({ providedIn: 'root' })

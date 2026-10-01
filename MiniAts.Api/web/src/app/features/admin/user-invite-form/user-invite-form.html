@@ -6,8 +6,13 @@
   } @else {
     <form class="mt-4 flex flex-col gap-2" [formGroup]="form" (ngSubmit)="submit()">
       <mat-form-field appearance="outline">
-        <mat-label>Organization</mat-label>
+        <mat-label>
+          {{ form.controls.role.value === 'Admin' ? 'Organization (optional)' : 'Organization' }}
+        </mat-label>
         <mat-select formControlName="orgId">
+          @if (form.controls.role.value === 'Admin') {
+            <mat-option value="">No organization (platform admin)</mat-option>
+          }
           @for (org of organizations(); track org.id) {
             <mat-option [value]="org.id">{{ org.name }}</mat-option>
           }

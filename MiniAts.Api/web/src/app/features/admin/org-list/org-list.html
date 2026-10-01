@@ -21,9 +21,14 @@
           class="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4"
         >
           <p class="font-medium text-slate-900">{{ org.name }}</p>
-          <a mat-stroked-button [routerLink]="['/admin/users/new']" [queryParams]="{ orgId: org.id }">
-            Invite user
-          </a>
+          <div class="flex items-center gap-2">
+            <a mat-stroked-button [routerLink]="['/admin/organizations', org.id, 'edit']">
+              Edit
+            </a>
+            <a mat-stroked-button [routerLink]="['/admin/users/new']" [queryParams]="{ orgId: org.id }">
+              Invite user
+            </a>
+          </div>
         </li>
       }
     </ul>

@@ -33,7 +33,10 @@ public class ProfileClaimsTransformation(MiniAtsDbContext db) : IClaimsTransform
         }
 
         var identity = (ClaimsIdentity)principal.Identity;
-        identity.AddClaim(new Claim(AppClaimTypes.OrgId, profile.OrgId.ToString()));
+        if (profile.OrgId is { } orgId)
+        {
+            identity.AddClaim(new Claim(AppClaimTypes.OrgId, orgId.ToString()));
+        }
         identity.AddClaim(new Claim(AppClaimTypes.AtsRole, profile.Role.ToString()));
 
         return principal;

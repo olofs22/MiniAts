@@ -10,16 +10,20 @@ export interface CreateOrganizationRequest {
   name: string;
 }
 
+export interface UpdateOrganizationRequest {
+  name: string;
+}
+
 export interface CreateUserRequest {
   email: string;
-  orgId: string;
+  orgId: string | null;
   role: ProfileRole;
 }
 
 export interface UserResponse {
   userId: string;
   email: string;
-  orgId: string;
+  orgId: string | null;
   role: ProfileRole;
   createdAt: string;
 }
@@ -27,7 +31,7 @@ export interface UserResponse {
 export interface CreateUserPartialFailureResponse {
   supabaseUserId: string;
   email: string;
-  orgId: string;
+  orgId: string | null;
   role: string;
   message: string;
 }

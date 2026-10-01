@@ -50,5 +50,25 @@ public class AdminOrganizationsController(MiniAtsDbContext db) : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = organization.Id }, ToResponse(organization));
     }
 
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult<OrganizationResponse>> Update(Guid id, UpdateOrganizationRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Name))
+        {
+            return BadRequest("Name is required.");
+        }
+
+        var organization = await db.Organizations.FirstOrDefaultAsync(o => o.Id == id);
+        if (organization is null)
+        {
+            return NotFound();
+        }
+
+        organization.Name = request.Name;
+        await db.SaveChangesAsync();
+
+        return Ok(ToResponse(organization));
+    }
+
     private static OrganizationResponse ToResponse(Organization o) => new(o.Id, o.Name, o.CreatedAt);
 }

@@ -6,6 +6,7 @@ import {
   CreateOrganizationRequest,
   CreateUserRequest,
   Organization,
+  UpdateOrganizationRequest,
   UserResponse,
 } from '../../shared/models/admin.model';
 
@@ -28,6 +29,12 @@ export class AdminService {
   createOrganization(request: CreateOrganizationRequest): Promise<Organization> {
     return firstValueFrom(
       this.http.post<Organization>(`${environment.apiUrl}/api/admin/organizations`, request),
+    );
+  }
+
+  updateOrganization(id: string, request: UpdateOrganizationRequest): Promise<Organization> {
+    return firstValueFrom(
+      this.http.put<Organization>(`${environment.apiUrl}/api/admin/organizations/${id}`, request),
     );
   }
 

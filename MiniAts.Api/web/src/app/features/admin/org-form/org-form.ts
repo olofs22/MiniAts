@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -24,14 +24,30 @@ import { AdminService } from '../admin.service';
 export class OrgForm {
   private readonly fb = inject(FormBuilder);
   private readonly adminService = inject(AdminService);
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
+  readonly orgId = this.route.snapshot.paramMap.get('id');
+  readonly isEdit = this.orgId !== null;
+
+  readonly loading = signal(false);
   readonly saving = signal(false);
   readonly error = signal<string | null>(null);
 
   readonly form = this.fb.nonNullable.group({
     name: ['', Validators.required],
   });
+
+  constructor() {
+    if (this.orgId) {
+      this.loading.set(true);
+      this.adminService
+        .getOrganization(this.orgId)
+        .then((org) => this.form.patchValue({ name: org.name }))
+        .catch(() => this.error.set('Could not load organization.'))
+        .finally(() => this.loading.set(false));
+    }
+  }
 
   async submit(): Promise<void> {
     if (this.form.invalid || this.saving()) {
@@ -43,7 +59,11 @@ export class OrgForm {
 
     try {
       const { name } = this.form.getRawValue();
-      await this.adminService.createOrganization({ name });
+      if (this.orgId) {
+        await this.adminService.updateOrganization(this.orgId, { name });
+      } else {
+        await this.adminService.createOrganization({ name });
+      }
       await this.router.navigateByUrl('/admin');
     } catch {
       this.error.set('Could not save organization.');

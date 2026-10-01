@@ -47,6 +47,16 @@ export class UserInviteForm {
 
   constructor() {
     this.loadOrganizations();
+
+    this.form.controls.role.valueChanges.subscribe((role) => {
+      const orgIdControl = this.form.controls.orgId;
+      if (role === 'Admin') {
+        orgIdControl.clearValidators();
+      } else {
+        orgIdControl.setValidators(Validators.required);
+      }
+      orgIdControl.updateValueAndValidity();
+    });
   }
 
   private async loadOrganizations(): Promise<void> {
@@ -77,7 +87,7 @@ export class UserInviteForm {
 
     try {
       const { orgId, email, role } = this.form.getRawValue();
-      await this.adminService.createUser({ orgId, email, role });
+      await this.adminService.createUser({ orgId: orgId || null, email, role });
       this.partialFailure.set(false);
       await this.router.navigateByUrl('/admin');
     } catch (err) {
