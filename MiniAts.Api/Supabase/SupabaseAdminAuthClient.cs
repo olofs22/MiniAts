@@ -8,6 +8,8 @@ public interface ISupabaseAdminAuthClient
 {
     Task<SupabaseUserResult> InviteUserByEmailAsync(string email, string? redirectTo = null, CancellationToken ct = default);
     Task<SupabaseUserResult?> FindUserByEmailAsync(string email, CancellationToken ct = default);
+    Task<SupabaseUserResult?> GetUserByIdAsync(Guid userId, CancellationToken ct = default);
+    Task BanUserAsync(Guid userId, CancellationToken ct = default);
 }
 
 public record SupabaseUserResult(Guid UserId, string Email);
@@ -86,7 +88,46 @@ public class SupabaseAdminAuthClient(HttpClient httpClient) : ISupabaseAdminAuth
         return null;
     }
 
+    public async Task<SupabaseUserResult?> GetUserByIdAsync(Guid userId, CancellationToken ct = default)
+    {
+        var response = await httpClient.GetAsync($"admin/users/{userId}", ct);
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync(ct);
+            throw new SupabaseAdminApiException(response.StatusCode, body);
+        }
+
+        var user = await response.Content.ReadFromJsonAsync<GoTrueUser>(ct)
+            ?? throw new SupabaseAdminApiException(response.StatusCode, "Empty response body.");
+
+        return new SupabaseUserResult(user.Id, user.Email);
+    }
+
+    // GoTrue has no "disable" flag; a ~100-year ban_duration is the supported way to
+    // block sign-in while keeping the auth user around.
+    public async Task BanUserAsync(Guid userId, CancellationToken ct = default)
+    {
+        var response = await httpClient.PutAsJsonAsync($"admin/users/{userId}", new BanUserRequest("876600h"), ct);
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return;
+        }
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync(ct);
+            throw new SupabaseAdminApiException(response.StatusCode, body);
+        }
+    }
+
     private record InviteUserRequest(string Email);
+
+    private record BanUserRequest([property: JsonPropertyName("ban_duration")] string BanDuration);
 
     private record GoTrueUser(
         [property: JsonPropertyName("id")] Guid Id,

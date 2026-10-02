@@ -1,6 +1,7 @@
 using System.Net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using MiniAts.Api.Controllers;
@@ -234,5 +235,104 @@ public class AdminUsersControllerTests
         var response = Assert.IsType<CreateUserPartialFailureResponse>(serverError.Value);
         Assert.Equal(collidingUserId, response.SupabaseUserId);
         Assert.Equal(org.Id, response.OrgId);
+    }
+
+    [Fact]
+    public async Task GetAll_WithOrgId_ReturnsOnlyThatOrgsUsersWithEmails()
+    {
+        using var db = TestDb.CreateContext();
+        var org = await SeedOrganization(db);
+        var otherOrg = await SeedOrganization(db, "Other Inc");
+        var userId = Guid.NewGuid();
+        db.Profiles.AddRange(
+            new Profile { UserId = userId, OrgId = org.Id, Role = ProfileRole.Customer },
+            new Profile { UserId = Guid.NewGuid(), OrgId = otherOrg.Id, Role = ProfileRole.Customer });
+        await db.SaveChangesAsync();
+
+        var supabase = new FakeSupabaseAdminAuthClient
+        {
+            GetUserById = id => Task.FromResult<SupabaseUserResult?>(new SupabaseUserResult(id, "jane@example.com"))
+        };
+        var controller = CreateController(db, supabase);
+
+        var result = await controller.GetAll(org.Id);
+
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
+        var users = Assert.IsAssignableFrom<IEnumerable<UserResponse>>(ok.Value).ToList();
+        var user = Assert.Single(users);
+        Assert.Equal(userId, user.UserId);
+        Assert.Equal("jane@example.com", user.Email);
+    }
+
+    [Fact]
+    public async Task GetAll_WhenSupabaseUserMissing_ReturnsUnknownEmail()
+    {
+        using var db = TestDb.CreateContext();
+        var org = await SeedOrganization(db);
+        db.Profiles.Add(new Profile { UserId = Guid.NewGuid(), OrgId = org.Id, Role = ProfileRole.Customer });
+        await db.SaveChangesAsync();
+
+        var supabase = new FakeSupabaseAdminAuthClient
+        {
+            GetUserById = _ => Task.FromResult<SupabaseUserResult?>(null)
+        };
+        var controller = CreateController(db, supabase);
+
+        var result = await controller.GetAll(org.Id);
+
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
+        var user = Assert.Single(Assert.IsAssignableFrom<IEnumerable<UserResponse>>(ok.Value));
+        Assert.Equal("(unknown)", user.Email);
+    }
+
+    [Fact]
+    public async Task Delete_BansSupabaseUserAndRemovesProfile()
+    {
+        using var db = TestDb.CreateContext();
+        var org = await SeedOrganization(db);
+        var userId = Guid.NewGuid();
+        db.Profiles.Add(new Profile { UserId = userId, OrgId = org.Id, Role = ProfileRole.Customer });
+        await db.SaveChangesAsync();
+
+        var supabase = new FakeSupabaseAdminAuthClient();
+        var controller = CreateController(db, supabase);
+
+        var result = await controller.Delete(userId);
+
+        Assert.IsType<NoContentResult>(result);
+        Assert.Equal([userId], supabase.BannedUserIds);
+        Assert.Null(await db.Profiles.FindAsync(userId));
+    }
+
+    [Fact]
+    public async Task Delete_UnknownUser_ReturnsNotFoundWithoutBanning()
+    {
+        using var db = TestDb.CreateContext();
+        var supabase = new FakeSupabaseAdminAuthClient();
+        var controller = CreateController(db, supabase);
+
+        var result = await controller.Delete(Guid.NewGuid());
+
+        Assert.IsType<NotFoundResult>(result);
+        Assert.Empty(supabase.BannedUserIds);
+    }
+
+    [Fact]
+    public async Task Delete_WhenBanFails_KeepsProfile()
+    {
+        using var db = TestDb.CreateContext();
+        var org = await SeedOrganization(db);
+        var userId = Guid.NewGuid();
+        db.Profiles.Add(new Profile { UserId = userId, OrgId = org.Id, Role = ProfileRole.Customer });
+        await db.SaveChangesAsync();
+
+        var supabase = new FakeSupabaseAdminAuthClient
+        {
+            BanUser = _ => throw new SupabaseAdminApiException(HttpStatusCode.BadGateway, "down")
+        };
+        var controller = CreateController(db, supabase);
+
+        await Assert.ThrowsAsync<SupabaseAdminApiException>(() => controller.Delete(userId));
+        Assert.NotNull(await db.Profiles.AsNoTracking().FirstOrDefaultAsync(p => p.UserId == userId));
     }
 }

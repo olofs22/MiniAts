@@ -18,6 +18,52 @@ public class AdminUsersController(
     IConfiguration config,
     ILogger<AdminUsersController> logger) : ControllerBase
 {
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<UserResponse>>> GetAll([FromQuery] Guid? orgId)
+    {
+        var query = db.Profiles.AsNoTracking();
+        if (orgId is not null)
+        {
+            query = query.Where(p => p.OrgId == orgId);
+        }
+
+        var profiles = (await query.ToListAsync()).OrderBy(p => p.CreatedAt).ToList();
+
+        // Email lives only in Supabase Auth. One lookup per user is fine at MVP org sizes.
+        var users = new List<UserResponse>(profiles.Count);
+        foreach (var profile in profiles)
+        {
+            var supabaseUser = await supabaseAdmin.GetUserByIdAsync(profile.UserId);
+            users.Add(new UserResponse(
+                profile.UserId,
+                supabaseUser?.Email ?? "(unknown)",
+                profile.OrgId,
+                profile.Role.ToString(),
+                profile.CreatedAt));
+        }
+
+        return Ok(users);
+    }
+
+    [HttpDelete("{userId:guid}")]
+    public async Task<IActionResult> Delete(Guid userId)
+    {
+        var profile = await db.Profiles.FirstOrDefaultAsync(p => p.UserId == userId);
+        if (profile is null)
+        {
+            return NotFound();
+        }
+
+        // Ban first: if Supabase fails, the profile stays and the admin can retry,
+        // rather than leaving a still-active login with no profile.
+        await supabaseAdmin.BanUserAsync(userId);
+
+        db.Profiles.Remove(profile);
+        await db.SaveChangesAsync();
+
+        return NoContent();
+    }
+
     [HttpPost]
     public async Task<ActionResult<UserResponse>> Create(CreateUserRequest request)
     {
