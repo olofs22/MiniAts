@@ -24,9 +24,12 @@ jobs:
       - name: Install
         working-directory: MiniAts.Api/web
         run: npm ci
+      # Tests use the development config, whose real env file is gitignored (local keys).
       - name: Test
         working-directory: MiniAts.Api/web
-        run: npx ng test --watch=false
+        run: |
+          cp src/environments/environment.development.ts.example src/environments/environment.development.ts
+          npx ng test --watch=false
       # Plain `ng build` would ship environment.ts's REPLACE-WITH-* placeholders (see DEPLOY.md).
       - name: Build
         working-directory: MiniAts.Api/web
