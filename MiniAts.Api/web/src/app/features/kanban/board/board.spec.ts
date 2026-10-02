@@ -1,5 +1,20 @@
 import { Application } from '../../../shared/models/application.model';
-import { computeDropPosition } from './board';
+import { computeDropPosition, toExternalUrl } from './board';
+
+describe('toExternalUrl', () => {
+  it('adds https:// to a scheme-less URL', () => {
+    expect(toExternalUrl('linkedin.com/in/erik')).toBe('https://linkedin.com/in/erik');
+  });
+
+  it('keeps an existing http(s) scheme', () => {
+    expect(toExternalUrl('https://www.linkedin.com/in/erik')).toBe('https://www.linkedin.com/in/erik');
+    expect(toExternalUrl('HTTP://example.com')).toBe('HTTP://example.com');
+  });
+
+  it('trims surrounding whitespace', () => {
+    expect(toExternalUrl('  linkedin.com/in/erik ')).toBe('https://linkedin.com/in/erik');
+  });
+});
 
 function app(position: number): Application {
   return { position } as Application;

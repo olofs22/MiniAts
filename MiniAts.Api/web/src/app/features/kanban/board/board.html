@@ -48,7 +48,7 @@
                     }
                     @if (c.linkedInUrl) {
                       <a
-                        [href]="c.linkedInUrl"
+                        [href]="toExternalUrl(c.linkedInUrl)"
                         target="_blank"
                         rel="noopener"
                         class="truncate text-xs text-blue-600 hover:underline"

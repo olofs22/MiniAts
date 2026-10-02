@@ -14,6 +14,13 @@ import { CandidatesService } from '../../candidates/candidates.service';
 import { JobsService } from '../../jobs/jobs.service';
 import { CandidatePicker } from '../candidate-picker/candidate-picker';
 
+// Stored URLs are often scheme-less ("linkedin.com/in/x"); without a scheme the browser
+// resolves them relative to this site.
+export function toExternalUrl(url: string): string {
+  const trimmed = url.trim();
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}
+
 // No rebalancing: halving a gap takes ~50 drops into the exact same slot before doubles
 // collide, which a single job's column won't hit at MVP scale.
 export function computeDropPosition(
@@ -94,6 +101,8 @@ export class Board {
   candidateName(candidateId: string): string {
     return this.candidatesById().get(candidateId)?.name ?? 'Unknown candidate';
   }
+
+  readonly toExternalUrl = toExternalUrl;
 
   candidate(candidateId: string): Candidate | undefined {
     return this.candidatesById().get(candidateId);
