@@ -5,7 +5,13 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>66182b15-9174-429a-93b1-57c3963e040c</UserSecretsId>
+    <!-- The Angular app lives under web/; without this its *.json files ship with the API. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);web\**</DefaultItemExcludes>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="dotnet-tools.json" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
