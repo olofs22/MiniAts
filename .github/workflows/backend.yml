@@ -1,0 +1,58 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "MiniAts.Api/**"
+      - "!MiniAts.Api/web/**"
+      - "MiniAts.Api.Tests/**"
+      - "MiniAts.slnx"
+      - ".github/workflows/backend.yml"
+  pull_request:
+    branches: [master]
+    paths:
+      - "MiniAts.Api/**"
+      - "!MiniAts.Api/web/**"
+      - "MiniAts.Api.Tests/**"
+      - "MiniAts.slnx"
+  workflow_dispatch:
+
+concurrency:
+  group: backend-deploy
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet test MiniAts.slnx --nologo
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    # OIDC: the Entra app "MiniAts GitHub Deploy" trusts this repo's master branch and is
+    # Website Contributor on MiniAtsBackend only; no publish profile or password is stored.
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet publish MiniAts.Api/MiniAts.Api.csproj -c Release -o publish --nologo
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - uses: azure/webapps-deploy@v3
+        with:
+          app-name: MiniAtsBackend
+          package: publish

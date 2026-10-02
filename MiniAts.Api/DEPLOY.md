@@ -68,6 +68,26 @@ file afterward (it's a build artifact at that point, not a tracked value).
 - CORS is locked to the origin(s) configured above; a request from any other origin will
   be rejected by the browser.
 
+## Current hosting (Azure)
+
+Everything lives in resource group `AtsGroup`; the database stays on Supabase (shared with
+local dev for now).
+
+- **API:** App Service `MiniAtsBackend` (Linux, .NET 10, plan `ASP-MiniAts` B1, Sweden
+  Central — West/North Europe had no capacity/quota) at
+  `https://miniatsbackend.azurewebsites.net`. The config table above is set as app settings.
+  Deployed by `.github/workflows/backend.yml` on pushes to `master` that touch backend or
+  test code: runs the tests, then deploys via OIDC (Entra app "MiniAts GitHub Deploy",
+  Website Contributor on this web app only; IDs in repo secrets `AZURE_*`).
+- **Frontend:** Static Web App `MiniAtsFrontEnd` at
+  `https://gentle-plant-01f8f910f.2.azurestaticapps.net`. Deployed by the
+  `azure-static-web-apps-*.yml` workflow, which runs `npm run build:prod` with repo
+  variables `API_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`. `web/public/staticwebapp.config.json`
+  makes deep links like `/jobs` fall back to the app instead of 404.
+- **Supabase dashboard (manual):** Authentication → URL Configuration must list
+  `https://gentle-plant-01f8f910f.2.azurestaticapps.net/accept-invite` as a redirect URL,
+  or invite emails won't land on the app.
+
 ## Sanity check after deploy
 
 **Automated:** `node scripts/smoke-test.mjs` (from `MiniAts.Api/`) runs the whole API flow
