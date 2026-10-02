@@ -53,6 +53,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'candidates/from-cv',
+        loadComponent: () =>
+          import('./features/candidates/candidate-from-cv/candidate-from-cv').then(
+            (m) => m.CandidateFromCv,
+          ),
+      },
+      {
         path: 'candidates/:id',
         loadComponent: () =>
           import('./features/candidates/candidate-detail/candidate-detail').then(

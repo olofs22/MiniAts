@@ -18,3 +18,18 @@ export interface CreateCandidateRequest {
 }
 
 export type UpdateCandidateRequest = CreateCandidateRequest;
+
+export interface CvJobMatch {
+  jobId: string;
+  jobTitle: string;
+  score: number;
+  reason: string;
+}
+
+export interface CvAnalysis {
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  linkedInUrl: string | null;
+  matches: CvJobMatch[];
+}

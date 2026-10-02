@@ -1,7 +1,10 @@
 <div class="mx-auto max-w-3xl p-6">
   <div class="flex items-center justify-between">
     <h1 class="text-xl font-semibold text-slate-900">Candidates</h1>
-    <a mat-stroked-button color="primary" routerLink="/candidates/new">New candidate</a>
+    <div class="flex items-center gap-2">
+      <a mat-stroked-button routerLink="/candidates/from-cv">New from CV</a>
+      <a mat-stroked-button color="primary" routerLink="/candidates/new">New candidate</a>
+    </div>
   </div>
 
   <mat-form-field appearance="outline" class="mt-4 w-full">

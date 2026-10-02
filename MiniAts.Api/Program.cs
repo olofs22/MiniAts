@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using MiniAts.Api.Auth;
+using MiniAts.Api.CvAnalysis;
 using MiniAts.Api.Data;
 using MiniAts.Api.Entities;
 using MiniAts.Api.Supabase;
@@ -38,6 +39,7 @@ builder.Services.AddDbContext<MiniAtsDbContext>(options =>
 
 builder.Services.AddScoped<IClaimsTransformation, ProfileClaimsTransformation>();
 builder.Services.AddScoped<IOrgAccessService, OrgAccessService>();
+builder.Services.AddScoped<ICvAnalyzer, ClaudeCvAnalyzer>();
 
 builder.Services.AddExceptionHandler<OrgAccessExceptionHandler>();
 builder.Services.AddProblemDetails();

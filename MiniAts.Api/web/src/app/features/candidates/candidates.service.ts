@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import {
   Candidate,
   CreateCandidateRequest,
+  CvAnalysis,
   UpdateCandidateRequest,
 } from '../../shared/models/candidate.model';
 
@@ -29,6 +30,14 @@ export class CandidatesService {
   update(id: string, request: UpdateCandidateRequest): Promise<void> {
     return firstValueFrom(
       this.http.put<void>(`${environment.apiUrl}/api/candidates/${id}`, request),
+    );
+  }
+
+  analyzeCv(file: File): Promise<CvAnalysis> {
+    const body = new FormData();
+    body.append('file', file);
+    return firstValueFrom(
+      this.http.post<CvAnalysis>(`${environment.apiUrl}/api/candidates/analyze-cv`, body),
     );
   }
 

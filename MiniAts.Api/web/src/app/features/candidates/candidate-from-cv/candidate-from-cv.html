@@ -1,0 +1,116 @@
+<div class="mx-auto max-w-lg p-6">
+  <a routerLink="/candidates" class="text-sm text-slate-500 hover:text-slate-700">&larr; Candidates</a>
+  <h1 class="mt-1 text-xl font-semibold text-slate-900">New candidate from CV</h1>
+  <p class="mt-1 text-sm text-slate-500">
+    Upload a PDF CV. AI fills in the details and suggests the best-fitting open job. The CV
+    itself is not stored.
+  </p>
+
+  <div class="mt-4 flex items-center gap-3">
+    <input
+      #fileInput
+      type="file"
+      accept="application/pdf,.pdf"
+      class="hidden"
+      (change)="onFileSelected($event)"
+    />
+    <button
+      mat-stroked-button
+      color="primary"
+      type="button"
+      [disabled]="analyzing() || saving() || savedCandidateId()"
+      (click)="fileInput.click()"
+    >
+      {{ analyzed() ? 'Upload another CV' : 'Choose PDF' }}
+    </button>
+    @if (fileName()) {
+      <span class="truncate text-sm text-slate-600">{{ fileName() }}</span>
+    }
+  </div>
+
+  @if (analyzing()) {
+    <div class="mt-4 flex items-center gap-2 text-sm text-slate-500">
+      <mat-spinner diameter="20" />
+      Reading the CV... this usually takes 10–30 seconds.
+    </div>
+  }
+
+  @if (error()) {
+    <p class="mt-4 text-sm text-red-600">{{ error() }}</p>
+  }
+
+  @if (savedCandidateId(); as id) {
+    <a mat-stroked-button class="mt-2" [routerLink]="['/candidates', id]">Open candidate</a>
+  } @else if (analyzed() && !analyzing()) {
+    <section class="mt-6">
+      <h2 class="text-sm font-semibold text-slate-700">Suggested job</h2>
+      @if (matches().length === 0) {
+        <p class="mt-1 text-sm text-slate-500">No open jobs to match against.</p>
+      } @else {
+        <mat-radio-group
+          class="mt-2 flex flex-col gap-2"
+          [ngModel]="selectedJobId()"
+          (ngModelChange)="selectedJobId.set($event)"
+        >
+          @for (match of matches(); track match.jobId; let first = $first) {
+            <div
+              class="rounded-lg border p-3"
+              [class.border-blue-400]="first"
+              [class.bg-blue-50]="first"
+              [class.border-slate-200]="!first"
+            >
+              <mat-radio-button [value]="match.jobId">
+                <span class="font-medium text-slate-900">{{ match.jobTitle }}</span>
+                <span class="ml-2 text-sm text-slate-500">{{ match.score }}% fit</span>
+                @if (first) {
+                  <span class="ml-2 rounded bg-blue-100 px-1.5 py-0.5 text-xs text-blue-700">Best match</span>
+                }
+              </mat-radio-button>
+              <p class="ml-10 text-sm text-slate-600">{{ match.reason }}</p>
+            </div>
+          }
+          <mat-radio-button value="">Don't add to a job yet</mat-radio-button>
+        </mat-radio-group>
+      }
+    </section>
+
+    <form class="mt-6 flex flex-col gap-2" [formGroup]="form" (ngSubmit)="submit()">
+      <h2 class="text-sm font-semibold text-slate-700">Candidate details (check before saving)</h2>
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Phone</mat-label>
+        <input matInput formControlName="phone" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>LinkedIn URL</mat-label>
+        <input matInput formControlName="linkedInUrl" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Notes</mat-label>
+        <textarea matInput formControlName="notes" rows="3"></textarea>
+      </mat-form-field>
+
+      <div class="mt-2 flex items-center gap-2">
+        <button mat-stroked-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+          @if (saving()) {
+            <mat-spinner diameter="20" />
+          } @else {
+            {{ selectedJobId() ? 'Save and add to job' : 'Save candidate' }}
+          }
+        </button>
+        <a mat-button routerLink="/candidates">Cancel</a>
+      </div>
+    </form>
+  }
+</div>
