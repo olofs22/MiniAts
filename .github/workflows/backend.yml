@@ -56,3 +56,5 @@ jobs:
         with:
           app-name: MiniAtsBackend
           package: publish
+      # The zip deploy has left the old process serving the previous build; force the switch.
+      - run: az webapp restart --name MiniAtsBackend --resource-group AtsGroup

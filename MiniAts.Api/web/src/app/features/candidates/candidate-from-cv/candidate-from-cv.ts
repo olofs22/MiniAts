@@ -122,6 +122,9 @@ export class CandidateFromCv {
   private describeError(err: unknown): string {
     if (err instanceof HttpErrorResponse) {
       if (err.status === 503) return 'CV analysis is not set up on the server yet.';
+      if (err.status === 403) {
+        return 'Your account is not part of an organization. Sign in as a user of a customer organization to add candidates.';
+      }
       if (err.status === 400 && typeof err.error === 'string') return err.error;
       if (err.status === 502 && err.error?.detail) return err.error.detail;
     }
