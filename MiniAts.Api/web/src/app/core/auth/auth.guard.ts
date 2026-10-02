@@ -8,5 +8,5 @@ export const authGuard: CanActivateFn = async () => {
 
   await auth.ready();
 
-  return auth.isAuthenticated() ? true : router.parseUrl('/login');
+  return auth.isAuthenticated() ? true : router.parseUrl('/welcome');
 };

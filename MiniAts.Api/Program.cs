@@ -1,4 +1,7 @@
 using System.Net.Http.Headers;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.HttpOverrides;
+using MiniAts.Api.Controllers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
@@ -41,6 +44,25 @@ builder.Services.AddScoped<IClaimsTransformation, ProfileClaimsTransformation>()
 builder.Services.AddScoped<IOrgAccessService, OrgAccessService>();
 builder.Services.AddScoped<ICvAnalyzer, ClaudeCvAnalyzer>();
 
+// App Service's front end appends the real client IP as the last X-Forwarded-For entry;
+// trusting only that hop keeps a client from spoofing its IP for the rate limiter.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.ForwardLimit = 1;
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy(SignupRequestsController.RateLimitPolicy, context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions { PermitLimit = 5, Window = TimeSpan.FromHours(1) }));
+});
+
 builder.Services.AddExceptionHandler<OrgAccessExceptionHandler>();
 builder.Services.AddProblemDetails();
 
@@ -74,6 +96,7 @@ builder.Services.AddAuthorization(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseForwardedHeaders();
 app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
@@ -90,6 +113,7 @@ app.UseCors("Frontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 
 app.MapControllers();
 

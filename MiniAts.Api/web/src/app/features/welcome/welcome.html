@@ -1,0 +1,109 @@
+<div class="flex min-h-screen flex-col bg-slate-50">
+  <header class="border-b border-slate-200 bg-white">
+    <div class="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
+      <span class="text-lg font-semibold tracking-tight text-slate-900">Mini-ATS</span>
+      @if (isAuthenticated()) {
+        <a mat-stroked-button color="primary" routerLink="/">Go to app</a>
+      } @else {
+        <a mat-stroked-button color="primary" routerLink="/login">Log in</a>
+      }
+    </div>
+  </header>
+
+  <main class="mx-auto w-full max-w-5xl flex-1 px-6 py-12">
+    <section class="max-w-2xl">
+      <h1 class="text-3xl font-semibold tracking-tight text-slate-900">
+        A simple applicant tracking system for recruiting teams
+      </h1>
+      <p class="mt-3 text-slate-600">
+        Track jobs and candidates on a drag-and-drop board, and let AI read CVs, fill in candidate
+        details and suggest the best-fitting open job.
+      </p>
+    </section>
+
+    <div class="mt-10 grid gap-6 md:grid-cols-2">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Get your organization on Mini-ATS</mat-card-title>
+          <mat-card-subtitle>Tell us about your company and we'll set up your account.</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          @if (sent()) {
+            <p class="mt-4 text-sm text-slate-700">
+              Thanks! We've received your request and will get back to you by email.
+            </p>
+          } @else {
+            <form class="mt-4 flex flex-col gap-1" [formGroup]="form" (ngSubmit)="submit()">
+              <mat-form-field appearance="outline">
+                <mat-label>Company name</mat-label>
+                <input matInput formControlName="companyName" autocomplete="organization" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Your name</mat-label>
+                <input matInput formControlName="contactName" autocomplete="name" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Work email</mat-label>
+                <input matInput type="email" formControlName="email" autocomplete="email" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Message (optional)</mat-label>
+                <textarea matInput formControlName="message" rows="3"></textarea>
+              </mat-form-field>
+              <!-- Honeypot: hidden from people, filled in by bots. -->
+              <input
+                formControlName="website"
+                class="hidden"
+                tabindex="-1"
+                autocomplete="off"
+                aria-hidden="true"
+              />
+
+              @if (error()) {
+                <p class="text-sm text-red-600">{{ error() }}</p>
+              }
+
+              <button
+                mat-stroked-button
+                color="primary"
+                type="submit"
+                [disabled]="form.invalid || sending()"
+              >
+                @if (sending()) {
+                  <mat-spinner diameter="20" />
+                } @else {
+                  Send request
+                }
+              </button>
+            </form>
+          }
+          <p class="mt-4 text-xs text-slate-500">
+            Prefer email? Write to
+            <a class="text-blue-600 hover:underline" [href]="'mailto:' + contactEmail">{{ contactEmail }}</a>.
+          </p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="h-fit">
+        <mat-card-header>
+          <mat-card-title>Already using Mini-ATS?</mat-card-title>
+          <mat-card-subtitle>Customers and admins log in here.</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="mt-4 text-sm text-slate-600">
+            Got an invite email? Use the link in it to set your password first.
+          </p>
+        </mat-card-content>
+        <mat-card-actions class="px-4 pb-4">
+          @if (isAuthenticated()) {
+            <a mat-stroked-button color="primary" routerLink="/">Go to app</a>
+          } @else {
+            <a mat-stroked-button color="primary" routerLink="/login">Log in</a>
+          }
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </main>
+
+  <app-footer />
+</div>

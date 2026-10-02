@@ -1,0 +1,51 @@
+<div class="mx-auto max-w-3xl p-6">
+  <a routerLink="/admin" class="text-sm text-slate-500 hover:text-slate-700">&larr; Organizations</a>
+  <h1 class="mt-1 text-xl font-semibold text-slate-900">Access requests</h1>
+  <p class="mt-1 text-sm text-slate-500">Companies that asked to get on Mini-ATS from the welcome page.</p>
+
+  @if (error()) {
+    <p class="mt-4 text-sm text-red-600">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="mt-4 text-sm text-slate-500">Loading requests...</p>
+  } @else if (requests().length === 0) {
+    <p class="mt-4 text-sm text-slate-500">No requests right now.</p>
+  } @else {
+    <ul class="mt-4 flex flex-col gap-3">
+      @for (request of requests(); track request.id) {
+        <li class="rounded-lg border border-slate-200 bg-white p-4">
+          <div class="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <p class="font-medium text-slate-900">{{ request.companyName }}</p>
+              <p class="text-sm text-slate-600">{{ request.contactName }} &middot; {{ request.email }}</p>
+              <p class="text-xs text-slate-400">{{ request.createdAt | date: 'medium' }}</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <a
+                mat-stroked-button
+                color="primary"
+                routerLink="/admin/organizations/new"
+                [queryParams]="{ name: request.companyName }"
+              >
+                Create organization
+              </a>
+              <a mat-stroked-button [href]="replyLink(request)">Reply</a>
+              @if (confirmingRemoveId() === request.id) {
+                <button mat-stroked-button class="btn-danger" (click)="remove(request.id)">Confirm</button>
+                <button mat-button (click)="cancelRemove()">Cancel</button>
+              } @else {
+                <button mat-stroked-button class="btn-danger" (click)="confirmRemove(request.id)">
+                  Remove
+                </button>
+              }
+            </div>
+          </div>
+          @if (request.message) {
+            <p class="mt-3 whitespace-pre-line text-sm text-slate-700">{{ request.message }}</p>
+          }
+        </li>
+      }
+    </ul>
+  }
+</div>

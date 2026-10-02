@@ -4,6 +4,10 @@ import { authGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
   {
+    path: 'welcome',
+    loadComponent: () => import('./features/welcome/welcome').then((m) => m.Welcome),
+  },
+  {
     path: 'login',
     loadComponent: () => import('./features/auth/login/login').then((m) => m.Login),
   },
@@ -76,6 +80,12 @@ export const routes: Routes = [
       {
         path: 'admin',
         loadComponent: () => import('./features/admin/org-list/org-list').then((m) => m.OrgList),
+        canActivate: [adminGuard],
+      },
+      {
+        path: 'admin/requests',
+        loadComponent: () =>
+          import('./features/admin/signup-requests/signup-requests').then((m) => m.SignupRequests),
         canActivate: [adminGuard],
       },
       {

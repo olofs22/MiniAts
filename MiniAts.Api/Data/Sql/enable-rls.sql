@@ -10,3 +10,5 @@ ALTER TABLE public.profiles      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.jobs          ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.candidates    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.applications  ENABLE ROW LEVEL SECURITY;
+-- signup_requests: enabled by its own migration (AddSignupRequests); repeated here for fresh setups.
+ALTER TABLE public.signup_requests ENABLE ROW LEVEL SECURITY;

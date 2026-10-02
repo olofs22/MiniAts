@@ -39,6 +39,11 @@ export class OrgForm {
   });
 
   constructor() {
+    const prefillName = this.route.snapshot.queryParamMap.get('name');
+    if (!this.orgId && prefillName) {
+      this.form.patchValue({ name: prefillName });
+    }
+
     if (this.orgId) {
       this.loading.set(true);
       this.adminService

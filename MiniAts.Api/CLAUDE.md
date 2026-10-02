@@ -50,6 +50,9 @@ I /web finns inloggning (Supabase) och dashboard, samt CRUD + Kanban för hela M
   samt en invite-accept-flow (`features/auth/accept-invite`) där en inbjuden användare
   sätter sitt lösenord via en Supabase-länk.
 - Header visar inloggad org/e-post (hämtas via `/api/me`, cachead i `MeService`).
+- Publik startsida (`features/welcome`, `/welcome`): utloggade hamnar här. Formulär för att
+  begära en org (`POST /api/signup-requests`, anonymt, max 5/h per IP + honeypot) och länk till
+  inloggning. Admin ser förfrågningarna under `/admin/requests`.
 - En global HTTP-interceptor loggar ut och skickar till `/login` vid 401 (sessionen är
   ogiltig/utgången), så appen inte bara visar ett generiskt felmeddelande.
 

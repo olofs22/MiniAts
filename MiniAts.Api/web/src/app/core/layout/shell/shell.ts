@@ -28,6 +28,6 @@ export class Shell {
   async signOut(): Promise<void> {
     await this.auth.signOut();
     this.meService.clear();
-    await this.router.navigateByUrl('/login');
+    await this.router.navigateByUrl('/welcome');
   }
 }

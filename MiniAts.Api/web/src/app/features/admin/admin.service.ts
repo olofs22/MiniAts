@@ -9,6 +9,7 @@ import {
   UpdateOrganizationRequest,
   UserResponse,
 } from '../../shared/models/admin.model';
+import { SignupRequest } from '../../shared/models/signup-request.model';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
@@ -55,6 +56,18 @@ export class AdminService {
   deactivateUser(userId: string): Promise<void> {
     return firstValueFrom(
       this.http.delete<void>(`${environment.apiUrl}/api/admin/users/${userId}`),
+    );
+  }
+
+  listSignupRequests(): Promise<SignupRequest[]> {
+    return firstValueFrom(
+      this.http.get<SignupRequest[]>(`${environment.apiUrl}/api/admin/signup-requests`),
+    );
+  }
+
+  deleteSignupRequest(id: string): Promise<void> {
+    return firstValueFrom(
+      this.http.delete<void>(`${environment.apiUrl}/api/admin/signup-requests/${id}`),
     );
   }
 

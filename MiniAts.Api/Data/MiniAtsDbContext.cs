@@ -10,6 +10,7 @@ public class MiniAtsDbContext(DbContextOptions<MiniAtsDbContext> options) : DbCo
     public DbSet<Job> Jobs => Set<Job>();
     public DbSet<Candidate> Candidates => Set<Candidate>();
     public DbSet<Application> Applications => Set<Application>();
+    public DbSet<SignupRequest> SignupRequests => Set<SignupRequest>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) =>
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(MiniAtsDbContext).Assembly);
