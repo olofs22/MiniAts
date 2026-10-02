@@ -15,7 +15,15 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+// Falls back to App:FrontendUrl (already required for invite emails) so a deploy that only
+// sets the frontend URL doesn't silently end up with an empty CORS allow-list.
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+if (allowedOrigins is null or { Length: 0 })
+{
+    var frontendUrl = builder.Configuration["App:FrontendUrl"];
+    allowedOrigins = string.IsNullOrWhiteSpace(frontendUrl) ? [] : [frontendUrl];
+}
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
@@ -30,6 +38,9 @@ builder.Services.AddDbContext<MiniAtsDbContext>(options =>
 
 builder.Services.AddScoped<IClaimsTransformation, ProfileClaimsTransformation>();
 builder.Services.AddScoped<IOrgAccessService, OrgAccessService>();
+
+builder.Services.AddExceptionHandler<OrgAccessExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddHttpClient<ISupabaseAdminAuthClient, SupabaseAdminAuthClient>((sp, client) =>
 {
@@ -61,6 +72,8 @@ builder.Services.AddAuthorization(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseExceptionHandler();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

@@ -21,6 +21,8 @@ export class JobPicker {
 
   readonly jobs = signal<Job[]>([]);
   readonly searchTerm = signal('');
+  readonly loading = signal(false);
+  readonly error = signal<string | null>(null);
 
   readonly options = computed(() => {
     const excluded = new Set(this.excludeJobIds());
@@ -31,7 +33,12 @@ export class JobPicker {
   });
 
   constructor() {
-    this.jobsService.list().then((jobs) => this.jobs.set(jobs));
+    this.loading.set(true);
+    this.jobsService
+      .list()
+      .then((jobs) => this.jobs.set(jobs))
+      .catch(() => this.error.set('Could not load jobs.'))
+      .finally(() => this.loading.set(false));
   }
 
   select(job: Job): void {

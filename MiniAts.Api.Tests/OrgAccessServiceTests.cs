@@ -58,6 +58,6 @@ public class OrgAccessServiceTests
         var user = CreateUser("Customer", null);
         var service = new OrgAccessService();
 
-        Assert.Throws<InvalidOperationException>(() => service.ResolveOrgId(user, null));
+        Assert.Throws<OrgAccessDeniedException>(() => service.ResolveOrgId(user, null));
     }
 }

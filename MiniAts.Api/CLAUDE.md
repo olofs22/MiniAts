@@ -23,8 +23,13 @@ Kanban visar applications. En kandidat kan ligga på flera jobb.
 ## Onboarding
 Ny org + första användaren för en kund skapas via `POST /api/admin/organizations` och
 `POST /api/admin/users` (kräver Admin-roll). Den allra första admin-användaren
-bootstrappas manuellt, se `Data/Sql/bootstrap-first-admin.sql`. Dessa endpoints
-saknar ännu automatiska tester (inget testprojekt finns i repot än).
+bootstrappas manuellt, se `Data/Sql/bootstrap-first-admin.sql`. Testprojekt finns i
+`/MiniAts.Api.Tests` (xUnit, syskon-mapp till `/MiniAts.Api`); dessa endpoints är redan
+väl testade där (`AdminUsersControllerTests`, `AdminOrganizationsControllerTests`).
+Jobs/Candidates/Applications-controllers saknar fortfarande tester.
+
+Se `DEPLOY.md` för vad som krävs för en riktig deploy (config, migrations, RLS-ordning,
+frontend-build).
 
 ## Frontend (implementerat)
 I /web finns inloggning (Supabase) och dashboard, samt CRUD + Kanban för hela MVP-flödet:
@@ -36,6 +41,12 @@ I /web finns inloggning (Supabase) och dashboard, samt CRUD + Kanban för hela M
   nytt fraktionellt `position`-värde själv vid varje drag och skriver `stage`+`position` tillsammans
   via PUT, med optimistisk uppdatering och rollback vid fel.
 - Delade typer/modeller ligger i `shared/models/`.
+- Admin-onboarding (`features/admin`): lista/skapa organisationer, bjuda in användare,
+  samt en invite-accept-flow (`features/auth/accept-invite`) där en inbjuden användare
+  sätter sitt lösenord via en Supabase-länk.
+- Header visar inloggad org/e-post (hämtas via `/api/me`, cachead i `MeService`).
+- En global HTTP-interceptor loggar ut och skickar till `/login` vid 401 (sessionen är
+  ogiltig/utgången), så appen inte bara visar ett generiskt felmeddelande.
 
 ## Konventioner
 - Controllers returnerar DTO:er, aldrig EF-entiteter.

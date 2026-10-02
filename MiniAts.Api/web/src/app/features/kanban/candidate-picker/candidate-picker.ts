@@ -21,6 +21,8 @@ export class CandidatePicker {
 
   readonly candidates = signal<Candidate[]>([]);
   readonly searchTerm = signal('');
+  readonly loading = signal(false);
+  readonly error = signal<string | null>(null);
 
   readonly options = computed(() => {
     const excluded = new Set(this.excludeCandidateIds());
@@ -31,7 +33,12 @@ export class CandidatePicker {
   });
 
   constructor() {
-    this.candidatesService.list().then((candidates) => this.candidates.set(candidates));
+    this.loading.set(true);
+    this.candidatesService
+      .list()
+      .then((candidates) => this.candidates.set(candidates))
+      .catch(() => this.error.set('Could not load candidates.'))
+      .finally(() => this.loading.set(false));
   }
 
   select(candidate: Candidate): void {

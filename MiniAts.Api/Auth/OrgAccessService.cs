@@ -28,13 +28,13 @@ public class OrgAccessService : IOrgAccessService
                 return ownOrgId;
             }
 
-            throw new InvalidOperationException(
+            throw new OrgAccessDeniedException(
                 "Admin has no home organization; an orgId must be specified.");
         }
 
         if (!hasOwnOrgId)
         {
-            throw new InvalidOperationException("User is missing an org_id claim.");
+            throw new OrgAccessDeniedException("User is missing an org_id claim.");
         }
 
         return ownOrgId;
