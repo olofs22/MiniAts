@@ -14,6 +14,8 @@ import { CandidatesService } from '../../candidates/candidates.service';
 import { JobsService } from '../../jobs/jobs.service';
 import { CandidatePicker } from '../candidate-picker/candidate-picker';
 
+// No rebalancing: halving a gap takes ~50 drops into the exact same slot before doubles
+// collide, which a single job's column won't hit at MVP scale.
 export function computeDropPosition(
   before: Application | null,
   after: Application | null,

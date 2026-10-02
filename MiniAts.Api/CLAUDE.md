@@ -24,9 +24,9 @@ Kanban visar applications. En kandidat kan ligga på flera jobb.
 Ny org + första användaren för en kund skapas via `POST /api/admin/organizations` och
 `POST /api/admin/users` (kräver Admin-roll). Den allra första admin-användaren
 bootstrappas manuellt, se `Data/Sql/bootstrap-first-admin.sql`. Testprojekt finns i
-`/MiniAts.Api.Tests` (xUnit, syskon-mapp till `/MiniAts.Api`); dessa endpoints är redan
-väl testade där (`AdminUsersControllerTests`, `AdminOrganizationsControllerTests`).
-Jobs/Candidates/Applications-controllers saknar fortfarande tester.
+`/MiniAts.Api.Tests` (xUnit, syskon-mapp till `/MiniAts.Api`). Alla controllers har
+tester där, med fokus på org-isolering; använd `TestDb` och `TestUsers` för nya tester.
+Frontend-tester (Vitest) körs med `npx ng test --watch=false` i /web.
 
 Se `DEPLOY.md` för vad som krävs för en riktig deploy (config, migrations, RLS-ordning,
 frontend-build).
