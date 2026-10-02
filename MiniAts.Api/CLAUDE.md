@@ -41,7 +41,9 @@ I /web finns inloggning (Supabase) och dashboard, samt CRUD + Kanban för hela M
   nytt fraktionellt `position`-värde själv vid varje drag och skriver `stage`+`position` tillsammans
   via PUT, med optimistisk uppdatering och rollback vid fel.
 - Delade typer/modeller ligger i `shared/models/`.
-- Admin-onboarding (`features/admin`): lista/skapa organisationer, bjuda in användare,
+- Admin-onboarding (`features/admin`): lista/skapa/ta bort organisationer (borttagning
+  kaskaderar explicit i endpointen och spärrar orgens användare i Supabase), lista och
+  inaktivera användare per org (`/admin/organizations/:id/users`), bjuda in användare,
   samt en invite-accept-flow (`features/auth/accept-invite`) där en inbjuden användare
   sätter sitt lösenord via en Supabase-länk.
 - Header visar inloggad org/e-post (hämtas via `/api/me`, cachead i `MeService`).

@@ -38,6 +38,26 @@ export class AdminService {
     );
   }
 
+  deleteOrganization(id: string): Promise<void> {
+    return firstValueFrom(
+      this.http.delete<void>(`${environment.apiUrl}/api/admin/organizations/${id}`),
+    );
+  }
+
+  listUsers(orgId: string): Promise<UserResponse[]> {
+    return firstValueFrom(
+      this.http.get<UserResponse[]>(`${environment.apiUrl}/api/admin/users`, {
+        params: { orgId },
+      }),
+    );
+  }
+
+  deactivateUser(userId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.delete<void>(`${environment.apiUrl}/api/admin/users/${userId}`),
+    );
+  }
+
   createUser(request: CreateUserRequest): Promise<UserResponse> {
     return firstValueFrom(
       this.http.post<UserResponse>(`${environment.apiUrl}/api/admin/users`, request),

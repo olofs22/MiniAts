@@ -84,6 +84,12 @@ export const routes: Routes = [
         canActivate: [adminGuard],
       },
       {
+        path: 'admin/organizations/:id/users',
+        loadComponent: () =>
+          import('./features/admin/org-users/org-users').then((m) => m.OrgUsers),
+        canActivate: [adminGuard],
+      },
+      {
         path: 'admin/users/new',
         loadComponent: () =>
           import('./features/admin/user-invite-form/user-invite-form').then(
