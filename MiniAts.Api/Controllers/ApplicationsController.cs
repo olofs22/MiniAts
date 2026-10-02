@@ -100,6 +100,12 @@ public class ApplicationsController(MiniAtsDbContext db, IOrgAccessService orgAc
             return BadRequest($"Invalid stage '{request.Stage}'.");
         }
 
+        // Negative values are legitimate (dropping above the first card yields first - 1).
+        if (!double.IsFinite(request.Position))
+        {
+            return BadRequest("Position must be a finite number.");
+        }
+
         var effectiveOrgId = orgAccess.ResolveOrgId(User, orgId);
 
         var application = await db.Applications.FirstOrDefaultAsync(a => a.Id == id && a.OrgId == effectiveOrgId);

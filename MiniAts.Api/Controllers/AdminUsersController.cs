@@ -27,7 +27,7 @@ public class AdminUsersController(
             query = query.Where(p => p.OrgId == orgId);
         }
 
-        var profiles = (await query.ToListAsync()).OrderBy(p => p.CreatedAt).ToList();
+        var profiles = await query.OrderBy(p => p.CreatedAt).ToListAsync();
 
         // Email lives only in Supabase Auth. One lookup per user is fine at MVP org sizes.
         var users = new List<UserResponse>(profiles.Count);
