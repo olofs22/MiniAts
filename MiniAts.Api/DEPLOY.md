@@ -70,6 +70,20 @@ file afterward (it's a build artifact at that point, not a tracked value).
 
 ## Sanity check after deploy
 
+**Automated:** `node scripts/smoke-test.mjs` (from `MiniAts.Api/`) runs the whole API flow
+end-to-end — onboarding, the customer job/candidate/Kanban flow, org isolation, user
+deactivation and cascade org delete — then deletes everything it created. Point it at a
+deployed environment with `API_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` and
+`SUPABASE_ANON_KEY`; with none set, it uses your local dev config against
+`http://localhost:5046`. It exits non-zero on any failure.
+
+It temporarily creates `mini-ats-test-*` users (including a test admin) in that Supabase
+project and needs the service role key, so run it from a trusted machine or CI secret
+store only. It doesn't touch existing data, but avoid running it in the middle of a live
+customer's working day.
+
+**Manual (UI):**
+
 1. Sign in as the bootstrapped admin, confirm `/api/me` returns the Admin role.
 2. Create a test organization + invite a test user (`/admin`), confirm the invite email
    link lands on the real frontend URL (not `localhost`).
