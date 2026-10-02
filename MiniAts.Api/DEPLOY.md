@@ -16,6 +16,7 @@ Set these as environment variables (or your host's secrets manager) in the real 
 | `Supabase__Audience` | `authenticated` | required |
 | `Supabase__ServiceRoleKey` | the Supabase service role key | required; app throws at startup if missing. Never expose to the frontend. |
 | `App__FrontendUrl` | `https://app.yourdomain.com` | required; used to build the invite-accept redirect link sent to new users |
+| `Anthropic__ApiKey` | Anthropic API key (console.anthropic.com) | optional; enables "New from CV". Without it that endpoint returns 503 and the rest of the app works normally. |
 | `Cors__AllowedOrigins__0` | `https://app.yourdomain.com` | optional — if unset, falls back to `App:FrontendUrl` (see `Program.cs`). Only set this separately if the frontend is served from a different origin than `App:FrontendUrl`. |
 
 Double-quotes/colons: ASP.NET Core reads nested config keys from env vars using `__`

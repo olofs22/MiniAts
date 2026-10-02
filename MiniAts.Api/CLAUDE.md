@@ -41,6 +41,9 @@ I /web finns inloggning (Supabase) och dashboard, samt CRUD + Kanban för hela M
   nytt fraktionellt `position`-värde själv vid varje drag och skriver `stage`+`position` tillsammans
   via PUT, med optimistisk uppdatering och rollback vid fel.
 - Delade typer/modeller ligger i `shared/models/`.
+- CV-analys med AI (`features/candidates/candidate-from-cv`, `POST /api/candidates/analyze-cv`,
+  `CvAnalysis/ClaudeCvAnalyzer.cs`): ladda upp en PDF, Claude fyller i kontaktuppgifter och
+  rankar orgens öppna jobb. CV:t sparas aldrig. Kräver `Anthropic:ApiKey`.
 - Admin-onboarding (`features/admin`): lista/skapa/ta bort organisationer (borttagning
   kaskaderar explicit i endpointen och spärrar orgens användare i Supabase), lista och
   inaktivera användare per org (`/admin/organizations/:id/users`), bjuda in användare,
@@ -61,4 +64,4 @@ I /web finns inloggning (Supabase) och dashboard, samt CRUD + Kanban för hela M
 - Committa efter varje fungerande steg.
 
 ## Utanför MVP (bara om jag ber om det)
-CV-uppladdning, aktivitetslogg, GDPR-gallring, statistik, AI-funktioner.
+Lagring av CV-filer, aktivitetslogg, GDPR-gallring, statistik, fler AI-funktioner.
