@@ -4,14 +4,15 @@
 // Learn more about theming and how to use it for your application's
 // custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
+@use './theme-colors' as theme; // palettes generated from the logo colours
 
 html {
   height: 100%;
   @include mat.theme(
     (
       color: (
-        primary: mat.$violet-palette,
-        tertiary: mat.$blue-palette,
+        primary: theme.$primary-palette,
+        tertiary: theme.$tertiary-palette,
       ),
       typography: Inter,
       density: 0,

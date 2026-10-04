@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80">
+  <!-- Icon: three kanban columns, last one with a checkmark -->
+  <g transform="translate(8,8)">
+    <rect x="0" y="0" width="64" height="64" rx="14" fill="#4F46E5"/>
+    <rect x="11" y="14" width="10" height="36" rx="3" fill="#FFFFFF" opacity="0.55"/>
+    <rect x="27" y="14" width="10" height="26" rx="3" fill="#FFFFFF" opacity="0.8"/>
+    <rect x="43" y="14" width="10" height="16" rx="3" fill="#FFFFFF"/>
+    <path d="M41 42 l5 5 l9 -11" fill="none" stroke="#5EEAD4" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="88" y="52" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif" font-size="34" font-weight="700" fill="#0F172A">Mini<tspan fill="#4F46E5">-ATS</tspan></text>
+</svg>

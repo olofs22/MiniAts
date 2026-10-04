@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/auth/auth.service';
 import { Footer } from '../../../core/layout/footer/footer';
+import { Logo } from '../../../core/layout/logo/logo';
 
 @Component({
   selector: 'app-accept-invite',
@@ -21,6 +22,7 @@ import { Footer } from '../../../core/layout/footer/footer';
     MatInputModule,
     MatProgressSpinnerModule,
     Footer,
+    Logo,
   ],
   templateUrl: './accept-invite.html',
   styleUrl: './accept-invite.css',

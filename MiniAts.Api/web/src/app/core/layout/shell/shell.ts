@@ -4,11 +4,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../auth/auth.service';
 import { MeService } from '../../me.service';
 import { Footer } from '../footer/footer';
+import { Logo } from '../logo/logo';
 
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, MatButtonModule, Footer],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, MatButtonModule, Footer, Logo],
   templateUrl: './shell.html',
   styleUrl: './shell.css',
 })
