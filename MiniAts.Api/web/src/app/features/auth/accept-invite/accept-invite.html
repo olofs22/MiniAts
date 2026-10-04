@@ -19,6 +19,9 @@
               This invite link is invalid or has expired. Ask an admin to send a new one.
             </p>
           }
+          @if (linkError()) {
+            <p class="mt-2 text-xs text-slate-500">Details: {{ linkError() }}</p>
+          }
         } @else if (!isAuthenticated()) {
           <p class="text-sm text-slate-500">
             {{ isReset ? 'Verifying your reset link...' : 'Verifying your invite...' }}

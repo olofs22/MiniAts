@@ -35,6 +35,8 @@ export class AcceptInvite {
 
   readonly isAuthenticated = this.auth.isAuthenticated;
   readonly linkInvalid = signal(false);
+  /** Supabase's own reason when it rejected the link, e.g. "otp_expired: Email link is ...". */
+  readonly linkError = signal<string | null>(null);
   readonly saving = signal(false);
   readonly error = signal<string | null>(null);
 
@@ -44,6 +46,16 @@ export class AcceptInvite {
   });
 
   constructor() {
+    // A rejected link comes back with error params in the fragment (or query). supabase-js
+    // swallows that error, so read it ourselves and fail fast with the real reason.
+    const linkError = readAuthErrorFromUrl();
+    if (linkError) {
+      console.warn('Supabase rejected the auth link:', linkError);
+      this.linkError.set(linkError);
+      this.linkInvalid.set(true);
+      return;
+    }
+
     // Supabase parses the invite/recovery token from the URL fragment asynchronously; give it
     // a few seconds before concluding the link is broken/expired rather than never resolving.
     setTimeout(() => {
@@ -80,4 +92,19 @@ export class AcceptInvite {
       this.saving.set(false);
     }
   }
+}
+
+/** Returns "code: description" if Supabase redirected here with an auth error, else null. */
+function readAuthErrorFromUrl(): string | null {
+  const fromHash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  const fromQuery = new URLSearchParams(window.location.search);
+
+  for (const params of [fromHash, fromQuery]) {
+    const code = params.get('error_code') ?? params.get('error');
+    const description = params.get('error_description');
+    if (code || description) {
+      return [code, description].filter(Boolean).join(': ');
+    }
+  }
+  return null;
 }
