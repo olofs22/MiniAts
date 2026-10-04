@@ -31,7 +31,9 @@ export class UserInviteForm {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
-  readonly roles: ProfileRole[] = ['Admin', 'Customer'];
+  // Set per route: org invites are always Customer, the nav's "Invite admin" route sets Admin.
+  readonly role: ProfileRole = this.route.snapshot.data['role'] ?? 'Customer';
+  readonly isAdminInvite = this.role === 'Admin';
 
   readonly organizations = signal<Organization[]>([]);
   readonly loadingOrgs = signal(false);
@@ -40,23 +42,14 @@ export class UserInviteForm {
   readonly partialFailure = signal(false);
 
   readonly form = this.fb.nonNullable.group({
-    orgId: ['', Validators.required],
+    orgId: ['', this.isAdminInvite ? [] : Validators.required],
     email: ['', [Validators.required, Validators.email]],
-    role: ['Customer' as ProfileRole, Validators.required],
   });
 
   constructor() {
-    this.loadOrganizations();
-
-    this.form.controls.role.valueChanges.subscribe((role) => {
-      const orgIdControl = this.form.controls.orgId;
-      if (role === 'Admin') {
-        orgIdControl.clearValidators();
-      } else {
-        orgIdControl.setValidators(Validators.required);
-      }
-      orgIdControl.updateValueAndValidity();
-    });
+    if (!this.isAdminInvite) {
+      this.loadOrganizations();
+    }
   }
 
   private async loadOrganizations(): Promise<void> {
@@ -86,10 +79,16 @@ export class UserInviteForm {
     this.error.set(null);
 
     try {
-      const { orgId, email, role } = this.form.getRawValue();
-      await this.adminService.createUser({ orgId: orgId || null, email, role });
+      const { orgId, email } = this.form.getRawValue();
+      await this.adminService.createUser({
+        orgId: this.isAdminInvite ? null : orgId,
+        email,
+        role: this.role,
+      });
       this.partialFailure.set(false);
-      await this.router.navigateByUrl('/admin');
+      await this.router.navigateByUrl(
+        this.isAdminInvite ? '/admin' : `/admin/organizations/${orgId}/users`,
+      );
     } catch (err) {
       this.partialFailure.set(false);
 

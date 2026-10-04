@@ -112,6 +112,16 @@ export const routes: Routes = [
           import('./features/admin/user-invite-form/user-invite-form').then(
             (m) => m.UserInviteForm,
           ),
+        data: { role: 'Customer' },
+        canActivate: [adminGuard],
+      },
+      {
+        path: 'admin/admins/new',
+        loadComponent: () =>
+          import('./features/admin/user-invite-form/user-invite-form').then(
+            (m) => m.UserInviteForm,
+          ),
+        data: { role: 'Admin' },
         canActivate: [adminGuard],
       },
     ],

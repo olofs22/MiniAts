@@ -46,7 +46,9 @@ I /web finns inloggning (Supabase) och dashboard, samt CRUD + Kanban för hela M
   rankar orgens öppna jobb. CV:t sparas aldrig. Kräver `Anthropic:ApiKey`.
 - Admin-onboarding (`features/admin`): lista/skapa/ta bort organisationer (borttagning
   kaskaderar explicit i endpointen och spärrar orgens användare i Supabase), lista och
-  inaktivera användare per org (`/admin/organizations/:id/users`), bjuda in användare,
+  inaktivera användare per org (`/admin/organizations/:id/users`), bjuda in användare
+  (inbjudan till en org blir alltid Customer; "Invite admin" i navbaren, `/admin/admins/new`,
+  skapar admins utan org – API:t avvisar Admin med orgId),
   samt en invite-accept-flow (`features/auth/accept-invite`) där en inbjuden användare
   sätter sitt lösenord via en Supabase-länk.
 - Header visar inloggad org/e-post (hämtas via `/api/me`, cachead i `MeService`).

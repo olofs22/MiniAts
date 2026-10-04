@@ -37,19 +37,19 @@ public class AdminUsersControllerTests
         };
         var controller = CreateController(db, supabase);
 
-        var result = await controller.Create(new CreateUserRequest("new.user@example.com", org.Id, "Admin"));
+        var result = await controller.Create(new CreateUserRequest("new.user@example.com", org.Id, "Customer"));
 
         var created = Assert.IsType<ObjectResult>(result.Result);
         Assert.Equal(StatusCodes.Status201Created, created.StatusCode);
         var response = Assert.IsType<UserResponse>(created.Value);
         Assert.Equal(supabaseUserId, response.UserId);
         Assert.Equal(org.Id, response.OrgId);
-        Assert.Equal("Admin", response.Role);
+        Assert.Equal("Customer", response.Role);
 
         var stored = await db.Profiles.FindAsync(supabaseUserId);
         Assert.NotNull(stored);
         Assert.Equal(org.Id, stored!.OrgId);
-        Assert.Equal(ProfileRole.Admin, stored.Role);
+        Assert.Equal(ProfileRole.Customer, stored.Role);
     }
 
     [Theory]
@@ -74,7 +74,7 @@ public class AdminUsersControllerTests
         using var db = TestDb.CreateContext();
         var controller = CreateController(db, new FakeSupabaseAdminAuthClient());
 
-        var result = await controller.Create(new CreateUserRequest(email, Guid.NewGuid(), "Admin"));
+        var result = await controller.Create(new CreateUserRequest(email, Guid.NewGuid(), "Customer"));
 
         var badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
         Assert.Equal("Email is required.", badRequest.Value);
@@ -87,10 +87,45 @@ public class AdminUsersControllerTests
         var controller = CreateController(db, new FakeSupabaseAdminAuthClient());
         var unknownOrgId = Guid.NewGuid();
 
-        var result = await controller.Create(new CreateUserRequest("user@example.com", unknownOrgId, "Admin"));
+        var result = await controller.Create(new CreateUserRequest("user@example.com", unknownOrgId, "Customer"));
 
         var notFound = Assert.IsType<NotFoundObjectResult>(result.Result);
         Assert.Equal($"Organization '{unknownOrgId}' not found.", notFound.Value);
+    }
+
+    [Fact]
+    public async Task Create_AdminWithOrgId_ReturnsBadRequest()
+    {
+        using var db = TestDb.CreateContext();
+        var org = await SeedOrganization(db);
+        var controller = CreateController(db, new FakeSupabaseAdminAuthClient());
+
+        var result = await controller.Create(new CreateUserRequest("admin@example.com", org.Id, "Admin"));
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
+        Assert.Equal("Admin users cannot belong to an organization.", badRequest.Value);
+        Assert.Empty(db.Profiles);
+    }
+
+    [Fact]
+    public async Task Create_AdminWithoutOrgId_CreatesProfileWithNullOrg()
+    {
+        using var db = TestDb.CreateContext();
+        var supabaseUserId = Guid.NewGuid();
+        var supabase = new FakeSupabaseAdminAuthClient
+        {
+            InviteUserByEmail = email => Task.FromResult(new SupabaseUserResult(supabaseUserId, email))
+        };
+        var controller = CreateController(db, supabase);
+
+        var result = await controller.Create(new CreateUserRequest("admin@example.com", null, "Admin"));
+
+        var created = Assert.IsType<ObjectResult>(result.Result);
+        Assert.Equal(StatusCodes.Status201Created, created.StatusCode);
+        var stored = await db.Profiles.FindAsync(supabaseUserId);
+        Assert.NotNull(stored);
+        Assert.Null(stored!.OrgId);
+        Assert.Equal(ProfileRole.Admin, stored.Role);
     }
 
     [Fact]
@@ -109,7 +144,7 @@ public class AdminUsersControllerTests
         };
         var controller = CreateController(db, supabase);
 
-        var result = await controller.Create(new CreateUserRequest("user@example.com", org.Id, "Admin"));
+        var result = await controller.Create(new CreateUserRequest("user@example.com", org.Id, "Customer"));
 
         var conflict = Assert.IsType<ConflictObjectResult>(result.Result);
         Assert.Equal("'user@example.com' is already onboarded to this organization.", conflict.Value);
@@ -132,7 +167,7 @@ public class AdminUsersControllerTests
         };
         var controller = CreateController(db, supabase);
 
-        var result = await controller.Create(new CreateUserRequest("user@example.com", org.Id, "Admin"));
+        var result = await controller.Create(new CreateUserRequest("user@example.com", org.Id, "Customer"));
 
         var conflict = Assert.IsType<ConflictObjectResult>(result.Result);
         Assert.Equal("'user@example.com' is already onboarded to a different organization.", conflict.Value);
@@ -152,7 +187,7 @@ public class AdminUsersControllerTests
         };
         var controller = CreateController(db, supabase);
 
-        var result = await controller.Create(new CreateUserRequest("user@example.com", org.Id, "Admin"));
+        var result = await controller.Create(new CreateUserRequest("user@example.com", org.Id, "Customer"));
 
         var created = Assert.IsType<ObjectResult>(result.Result);
         Assert.Equal(StatusCodes.Status201Created, created.StatusCode);
@@ -177,7 +212,7 @@ public class AdminUsersControllerTests
         };
         var controller = CreateController(db, supabase);
 
-        var result = await controller.Create(new CreateUserRequest("user@example.com", org.Id, "Admin"));
+        var result = await controller.Create(new CreateUserRequest("user@example.com", org.Id, "Customer"));
 
         var conflict = Assert.IsType<ConflictObjectResult>(result.Result);
         Assert.Equal(
@@ -197,7 +232,7 @@ public class AdminUsersControllerTests
         };
         var controller = CreateController(db, supabase);
 
-        var result = await controller.Create(new CreateUserRequest("user@example.com", org.Id, "Admin"));
+        var result = await controller.Create(new CreateUserRequest("user@example.com", org.Id, "Customer"));
 
         var unprocessable = Assert.IsType<UnprocessableEntityObjectResult>(result.Result);
         Assert.Contains("user@example.com", (string)unprocessable.Value!);
@@ -228,7 +263,7 @@ public class AdminUsersControllerTests
         };
         var controller = CreateController(db, supabase);
 
-        var result = await controller.Create(new CreateUserRequest("user@example.com", org.Id, "Admin"));
+        var result = await controller.Create(new CreateUserRequest("user@example.com", org.Id, "Customer"));
 
         var serverError = Assert.IsType<ObjectResult>(result.Result);
         Assert.Equal(StatusCodes.Status500InternalServerError, serverError.StatusCode);

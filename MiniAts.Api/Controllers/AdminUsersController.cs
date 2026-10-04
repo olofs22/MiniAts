@@ -82,6 +82,12 @@ public class AdminUsersController(
             return BadRequest("OrgId is required for Customer users.");
         }
 
+        // Organizations are always customer orgs; admins are platform-wide.
+        if (request.OrgId is not null && role == ProfileRole.Admin)
+        {
+            return BadRequest("Admin users cannot belong to an organization.");
+        }
+
         if (request.OrgId is not null)
         {
             var orgExists = await db.Organizations.AnyAsync(o => o.Id == request.OrgId);
