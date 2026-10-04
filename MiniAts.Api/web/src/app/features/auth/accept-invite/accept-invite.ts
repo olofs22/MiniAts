@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -14,6 +14,7 @@ import { Footer } from '../../../core/layout/footer/footer';
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    RouterLink,
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
@@ -29,6 +30,9 @@ export class AcceptInvite {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
+  // Same flow serves invite links (/accept-invite) and password-recovery links (/reset-password).
+  readonly isReset = inject(ActivatedRoute).snapshot.data['mode'] === 'reset';
+
   readonly isAuthenticated = this.auth.isAuthenticated;
   readonly linkInvalid = signal(false);
   readonly saving = signal(false);
@@ -40,7 +44,7 @@ export class AcceptInvite {
   });
 
   constructor() {
-    // Supabase parses the invite token from the URL fragment asynchronously; give it
+    // Supabase parses the invite/recovery token from the URL fragment asynchronously; give it
     // a few seconds before concluding the link is broken/expired rather than never resolving.
     setTimeout(() => {
       if (!this.isAuthenticated()) {
@@ -67,7 +71,11 @@ export class AcceptInvite {
       await this.auth.setPassword(password);
       await this.router.navigateByUrl('/');
     } catch {
-      this.error.set('Could not set your password. Try again, or ask an admin to resend the invite.');
+      this.error.set(
+        this.isReset
+          ? 'Could not set your password. Try again, or request a new reset link.'
+          : 'Could not set your password. Try again, or ask an admin to resend the invite.',
+      );
     } finally {
       this.saving.set(false);
     }

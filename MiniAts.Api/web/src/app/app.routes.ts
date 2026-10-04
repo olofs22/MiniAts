@@ -17,6 +17,17 @@ export const routes: Routes = [
       import('./features/auth/accept-invite/accept-invite').then((m) => m.AcceptInvite),
   },
   {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./features/auth/forgot-password/forgot-password').then((m) => m.ForgotPassword),
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./features/auth/accept-invite/accept-invite').then((m) => m.AcceptInvite),
+    data: { mode: 'reset' },
+  },
+  {
     path: '',
     loadComponent: () => import('./core/layout/shell/shell').then((m) => m.Shell),
     canActivate: [authGuard],

@@ -51,6 +51,8 @@ I /web finns inloggning (Supabase) och dashboard, samt CRUD + Kanban för hela M
   skapar admins utan org – API:t avvisar Admin med orgId),
   samt en invite-accept-flow (`features/auth/accept-invite`) där en inbjuden användare
   sätter sitt lösenord via en Supabase-länk.
+- Glömt lösenord: länk på login → `/forgot-password` (Supabase `resetPasswordForEmail`) →
+  mejllänk till `/reset-password`, som återanvänder `AcceptInvite` med `data: { mode: 'reset' }`.
 - Header visar inloggad org/e-post (hämtas via `/api/me`, cachead i `MeService`).
 - Publik startsida (`features/welcome`, `/welcome`): utloggade hamnar här. Formulär för att
   begära en org (`POST /api/signup-requests`, anonymt, max 5/h per IP + honeypot) och länk till

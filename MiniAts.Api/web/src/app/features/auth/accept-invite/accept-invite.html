@@ -4,16 +4,25 @@
 
     <mat-card class="w-full max-w-sm">
       <mat-card-header>
-        <mat-card-title>Set your password</mat-card-title>
+        <mat-card-title>{{ isReset ? 'Choose a new password' : 'Set your password' }}</mat-card-title>
       </mat-card-header>
 
       <mat-card-content>
         @if (linkInvalid()) {
-          <p class="text-sm text-red-600">
-            This invite link is invalid or has expired. Ask an admin to send a new one.
-          </p>
+          @if (isReset) {
+            <p class="text-sm text-red-600">
+              This reset link is invalid or has expired.
+              <a routerLink="/forgot-password" class="underline">Request a new one</a>.
+            </p>
+          } @else {
+            <p class="text-sm text-red-600">
+              This invite link is invalid or has expired. Ask an admin to send a new one.
+            </p>
+          }
         } @else if (!isAuthenticated()) {
-          <p class="text-sm text-slate-500">Verifying your invite...</p>
+          <p class="text-sm text-slate-500">
+            {{ isReset ? 'Verifying your reset link...' : 'Verifying your invite...' }}
+          </p>
         } @else {
           <form class="flex flex-col gap-2" [formGroup]="form" (ngSubmit)="submit()">
             <mat-form-field appearance="outline">

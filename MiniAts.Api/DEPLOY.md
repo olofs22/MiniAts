@@ -86,8 +86,9 @@ local dev for now).
   variables `API_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`. `web/public/staticwebapp.config.json`
   makes deep links like `/jobs` fall back to the app instead of 404.
 - **Supabase dashboard (manual):** Authentication → URL Configuration must list
-  `https://gentle-plant-01f8f910f.2.azurestaticapps.net/accept-invite` as a redirect URL,
-  or invite emails won't land on the app.
+  `https://gentle-plant-01f8f910f.2.azurestaticapps.net/accept-invite` and
+  `https://gentle-plant-01f8f910f.2.azurestaticapps.net/reset-password` as redirect URLs,
+  or invite and password-reset emails won't land on the app.
 
 ## Sanity check after deploy
 

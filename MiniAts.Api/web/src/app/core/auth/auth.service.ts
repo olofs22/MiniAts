@@ -36,6 +36,17 @@ export class AuthService {
     await supabase.auth.signOut();
   }
 
+  /**
+   * Emails a password-recovery link that signs the user in on /reset-password.
+   * Supabase does not reveal whether the email exists, so this succeeds either way.
+   */
+  async sendPasswordReset(email: string): Promise<void> {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) throw error;
+  }
+
   /** Sets a password on the currently-authenticated session (e.g. after accepting an invite). */
   async setPassword(password: string): Promise<void> {
     const { error } = await supabase.auth.updateUser({ password });
