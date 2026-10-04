@@ -47,9 +47,10 @@ export class ForgotPassword {
     try {
       await this.auth.sendPasswordReset(this.form.getRawValue().email);
       this.sent.set(true);
-    } catch {
-      // Supabase rate-limits recovery emails; that is the usual reason to land here.
-      this.error.set('Could not send the reset email. Wait a minute and try again.');
+    } catch (err) {
+      // Usually Supabase's email rate limit; show its own message so the cause is visible.
+      const detail = err instanceof Error && err.message ? ` (${err.message})` : '';
+      this.error.set(`Could not send the reset email. Wait a minute and try again.${detail}`);
     } finally {
       this.sending.set(false);
     }
