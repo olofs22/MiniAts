@@ -89,6 +89,17 @@ local dev for now).
   `https://gentle-plant-01f8f910f.2.azurestaticapps.net/accept-invite` and
   `https://gentle-plant-01f8f910f.2.azurestaticapps.net/reset-password` as redirect URLs,
   or invite and password-reset emails won't land on the app.
+- **Supabase email templates (manual, recommended):** Authentication → Emails → Templates.
+  Mail scanners (e.g. Outlook Safe Links) pre-open links, which burns the default one-time
+  `{{ .ConfirmationURL }}` and gives users `otp_expired`. Point the links at the app instead,
+  which only redeems the token when the user clicks Continue:
+  - Reset Password: `<a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=recovery">Reset password</a>`
+  - Invite user: `<a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=invite">Accept the invite</a>`
+
+  The old `ConfirmationURL` links still work, so this can be changed at any time.
+- **Supabase SMTP (before a real customer):** the built-in email sender is heavily
+  rate-limited (a few emails per hour per project), which breaks invites and resets.
+  Configure a provider under Authentication → Emails → SMTP Settings.
 
 ## Sanity check after deploy
 

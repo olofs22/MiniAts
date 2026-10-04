@@ -37,6 +37,9 @@ export class AcceptInvite {
   readonly linkInvalid = signal(false);
   /** Supabase's own reason when it rejected the link, e.g. "otp_expired: Email link is ...". */
   readonly linkError = signal<string | null>(null);
+  /** Set for scanner-proof links (?token_hash=...); redeemed only when the user clicks Continue. */
+  readonly pendingToken = signal<EmailToken | null>(null);
+  readonly verifying = signal(false);
   readonly saving = signal(false);
   readonly error = signal<string | null>(null);
 
@@ -56,13 +59,42 @@ export class AcceptInvite {
       return;
     }
 
-    // Supabase parses the invite/recovery token from the URL fragment asynchronously; give it
+    const token = readEmailTokenFromUrl(this.isReset ? 'recovery' : 'invite');
+    if (token) {
+      this.pendingToken.set(token);
+      return;
+    }
+
+    // Old-style link: Supabase parses the session from the URL fragment asynchronously; give it
     // a few seconds before concluding the link is broken/expired rather than never resolving.
     setTimeout(() => {
       if (!this.isAuthenticated()) {
         this.linkInvalid.set(true);
       }
     }, 5000);
+  }
+
+  async continueWithLink(): Promise<void> {
+    const token = this.pendingToken();
+    if (!token || this.verifying()) {
+      return;
+    }
+
+    this.verifying.set(true);
+    try {
+      await this.auth.verifyEmailToken(token.tokenHash, token.type);
+      this.pendingToken.set(null);
+      // Drop the spent token from the address bar so a refresh doesn't retry it.
+      await this.router.navigate([], { queryParams: {}, replaceUrl: true });
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err);
+      console.warn('Supabase rejected the email token:', detail);
+      this.pendingToken.set(null);
+      this.linkError.set(detail);
+      this.linkInvalid.set(true);
+    } finally {
+      this.verifying.set(false);
+    }
   }
 
   async submit(): Promise<void> {
@@ -107,4 +139,23 @@ function readAuthErrorFromUrl(): string | null {
     }
   }
   return null;
+}
+
+interface EmailToken {
+  tokenHash: string;
+  type: 'recovery' | 'invite';
+}
+
+/** Reads a scanner-proof `?token_hash=...&type=...` link; `type` falls back to the page's mode. */
+function readEmailTokenFromUrl(fallbackType: EmailToken['type']): EmailToken | null {
+  const params = new URLSearchParams(window.location.search);
+  const tokenHash = params.get('token_hash');
+  if (!tokenHash) {
+    return null;
+  }
+  const type = params.get('type');
+  return {
+    tokenHash,
+    type: type === 'recovery' || type === 'invite' ? type : fallbackType,
+  };
 }

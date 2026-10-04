@@ -47,6 +47,15 @@ export class AuthService {
     if (error) throw error;
   }
 
+  /**
+   * Redeems a one-time email token (from a `?token_hash=...&type=...` link) for a session.
+   * Called on an explicit user click so mail scanners that pre-open links can't burn the token.
+   */
+  async verifyEmailToken(tokenHash: string, type: 'recovery' | 'invite'): Promise<void> {
+    const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
+    if (error) throw error;
+  }
+
   /** Sets a password on the currently-authenticated session (e.g. after accepting an invite). */
   async setPassword(password: string): Promise<void> {
     const { error } = await supabase.auth.updateUser({ password });

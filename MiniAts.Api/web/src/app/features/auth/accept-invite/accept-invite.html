@@ -22,6 +22,28 @@
           @if (linkError()) {
             <p class="mt-2 text-xs text-slate-500">Details: {{ linkError() }}</p>
           }
+        } @else if (pendingToken()) {
+          <p class="text-sm text-slate-700">
+            {{
+              isReset
+                ? 'Click continue to choose a new password.'
+                : 'Click continue to accept your invite and set a password.'
+            }}
+          </p>
+          <button
+            mat-stroked-button
+            color="primary"
+            type="button"
+            class="mt-4 w-full"
+            [disabled]="verifying()"
+            (click)="continueWithLink()"
+          >
+            @if (verifying()) {
+              <mat-spinner diameter="20" />
+            } @else {
+              Continue
+            }
+          </button>
         } @else if (!isAuthenticated()) {
           <p class="text-sm text-slate-500">
             {{ isReset ? 'Verifying your reset link...' : 'Verifying your invite...' }}
