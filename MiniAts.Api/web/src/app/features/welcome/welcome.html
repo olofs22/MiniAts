@@ -50,7 +50,7 @@
                 <mat-label>Message (optional)</mat-label>
                 <textarea matInput formControlName="message" rows="3"></textarea>
               </mat-form-field>
-              <!-- Honeypot: hidden from people, filled in by bots. -->
+             
               <input
                 formControlName="website"
                 class="hidden"
@@ -77,10 +77,6 @@
               </button>
             </form>
           }
-          <p class="mt-4 text-xs text-slate-500">
-            Prefer email? Write to
-            <a class="text-blue-600 hover:underline" [href]="'mailto:' + contactEmail">{{ contactEmail }}</a>.
-          </p>
         </mat-card-content>
       </mat-card>
 

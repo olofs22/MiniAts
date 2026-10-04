@@ -31,7 +31,6 @@ export class Welcome {
   private readonly signupService = inject(SignupService);
 
   readonly isAuthenticated = inject(AuthService).isAuthenticated;
-  readonly contactEmail = 'olof.svensson22@outlook.com';
 
   readonly sending = signal(false);
   readonly sent = signal(false);
