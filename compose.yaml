@@ -1,0 +1,55 @@
+services:
+  api:
+    build:
+      context: ./MiniAts.Api
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__Supabase=Host=db;Port=5432;Database=miniats;Username=miniats;Password=${DB_PASSWORD}
+      - App__FrontendUrl=${FRONTEND_URL:-http://localhost}
+      - Cors__AllowedOrigins__0=${FRONTEND_URL:-http://localhost}
+      - Supabase__Url=https://daxyjdibwczoiakvpyit.supabase.co
+      - Supabase__Authority=https://daxyjdibwczoiakvpyit.supabase.co/auth/v1
+      - Supabase__Audience=authenticated
+      - Supabase__ServiceRoleKey=${SUPABASE_SERVICE_ROLE_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - frontend
+      - backend
+
+  db:
+    build: ./MiniAts.Db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=miniats
+      - POSTGRES_DB=miniats
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U miniats -d miniats"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  web:
+    build: ./MiniAts.Web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    networks:
+      - frontend
+
+networks:
+  frontend:
+  backend:
+    internal: true
+
+volumes:
+  db-data:

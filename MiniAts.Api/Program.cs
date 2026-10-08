@@ -85,6 +85,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.Authority = builder.Configuration["Supabase:Authority"];
         options.Audience = builder.Configuration["Supabase:Audience"];
         options.MapInboundClaims = false;
+        options.TokenValidationParameters.ValidIssuer = builder.Configuration["Supabase:Authority"];
     });
 
 builder.Services.AddAuthorization(options =>
